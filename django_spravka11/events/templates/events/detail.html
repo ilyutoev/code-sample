@@ -1,0 +1,59 @@
+{% extends 'events/base.html' %}
+
+{% load thumbnail %}
+
+{% block title %}{{ events.title }}{% endblock %}
+{% block description %}{{ events.title }}{% endblock %}
+
+{% block main_content %}
+{{ block.super }}
+
+<h1 class="block-header block-header--white">{{ events.title }}<span class="block-header__line"></span></h1>
+
+<table>
+<tr>
+    <td valign="top">{% if events.poster %}
+            <div class="htp__pic"><img src="{{ events.poster.url }}" width="300" height="423" alt="" /></div>
+        {% endif %}  </td>
+    <td valign="top">
+        <p>{{ events.ganre }}</p>
+        <p>{{ limit_year }}</p>
+        {% autoescape off %}{{ events.description }}{% endautoescape %}
+
+        {% if events.get_images %}
+            <ul class="h-list h-list--small-photo">
+            {% for img in events.get_images %}
+                {% thumbnail img.image "100x100" crop="center" as im %}
+                <li class="h-list__item"><a href="{{ img.image.url }}"><img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}"></a></li>
+                {% endthumbnail %}
+            {% endfor %}
+            </ul>
+        {% endif %}
+
+        <h2 class="block-header block-header--white">Сеансы</h2>
+        {% regroup events.event_detail by date as date_list %}
+
+            {% for date in date_list %}
+            
+            <h3 style="margin-top:10px;">{{ date.grouper|date:"l, d.m" }}<h3>
+            <div style="margin-left:20px;">
+                {% regroup date.list by place as place_list %}
+                    {% for place in place_list %}
+                        <h3 style="margin-top:10px;"><a href="{% url 'events_place' place.list.0.place.pk %}">{{ place.grouper }}</a></h3>
+
+                        <div style="margin-left:20px;">
+                        {% for item in place.list %}
+                            <span title="{{ item.price }} руб.">{{ item.time|date:"G:i" }}</span>{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                        </div>
+
+                    {% endfor %}
+            </div>
+
+            {% endfor %}
+
+    </td>
+</tr>
+</table>
+
+{% endblock %}

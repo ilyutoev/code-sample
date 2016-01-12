@@ -1,0 +1,37 @@
+{% extends 'events/base.html' %}
+
+{% block title %}{{ eventplace.name }}{% endblock %}
+{% block description %}{{ eventplace.name }}{% endblock %}
+
+{% block main_content %}
+{{ block.super }}
+
+<h1 class="block-header block-header--white">{{ eventplace.name }}<span class="block-header__line"></span></h1>
+
+{% autoescape off %}{{ eventplace.description }}{% endautoescape %}
+
+<h2 class="block-header block-header--white">Сеансы</h2>
+{% regroup eventplace.place_detail by date as date_list %}
+
+    {% for date in date_list %}
+    <div class="date">
+    {{ date.grouper|date:"l, d.m" }}
+    
+        {% regroup date.list by event as event_list %}
+            
+            {% for event in event_list %}
+            <div class="event">
+                <a href="{% url 'events_detail'  event.list.0.event.pk %}">{{ event.grouper }}</a>
+                <div class="time">
+                {% for item in event.list %}
+                    <span title="{{ item.price }} руб.">{{ item.time|date:"G:i" }}</span>{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+            
+    </div>
+    {% endfor %}
+    
+
+{% endblock %}

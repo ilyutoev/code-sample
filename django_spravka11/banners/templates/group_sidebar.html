@@ -1,0 +1,7 @@
+{% load banner %}
+
+{% for banner in banners %}
+    <div class="sidebar__block{% if forloop.counter|divisibleby:2 %} sidebar__block--texture{% endif %}">
+        {% banner_one banner.id 'banner_sidebar.html' %}
+    </div>  
+{% endfor %}

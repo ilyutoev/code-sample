@@ -1,0 +1,36 @@
+<div class="switch-wrap">
+    <ul class="switch">
+    {% if select_day %}
+        {% for eventtype in eventtype_list %}
+            <li class="switch__item {% if eventtype.pk == rubr %}switch__item--active{% endif %}"><a href="{% url 'eventtype_day_list' eventtype.pk select_day %}">{{ eventtype.title}}</a></li>
+        {% endfor %}
+    {% else %}
+        {% for eventtype in eventtype_list %}
+            <li class="switch__item {% if eventtype.pk == rubr %}switch__item--active{% endif %}"><a href="{% url 'eventtype_list' eventtype.pk %}">{{ eventtype.title}}</a></li>
+        {% endfor %}
+    {% endif %} 
+    </ul>
+</div>
+
+<div class="switch-wrap slider-wrap">
+    <div class="slider-wrap__prev">
+        <a href="#" class="slider-control slider-control--prev"><span class="prev"></span></a>
+    </div>
+    <div class="slider-wrap__next">
+        <a href="#" class="slider-control slider-control--next"><span class="next"></span></a>
+    </div>
+    <ul class="switch">
+    {% if rubr %}
+        <li class="switch__item {% if not select_day %}switch__item--active{% endif %}"><a href="{% url 'eventtype_list' rubr %}">{{ today|date:"l, j.m"|lower }}</a></li>
+
+        {% for day in day_list %}
+            <li class="switch__item {% if forloop.counter == select_day %}switch__item--active{% endif %}"><a href="{% url 'eventtype_day_list' rubr forloop.counter %}">{{ day|date:"l, j.m"|lower }}</a></li>
+        {% endfor %}
+    {% else %}
+        <li class="switch__item {% if not select_day %}switch__item--active{% endif %}"><a href="{% url 'events_list' %}">{{ today|date:"l, j.m"|lower }}</a></li>
+        {% for day in day_list %}
+            <li class="switch__item {% if forloop.counter == select_day %}switch__item--active{% endif %}"><a href="{% url 'days_list' forloop.counter %}">{{ day|date:"l, j.m"|lower }}</a></li>
+        {% endfor %}
+    {% endif %}
+    </ul>
+</div>

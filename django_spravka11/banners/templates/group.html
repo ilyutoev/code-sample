@@ -1,0 +1,7 @@
+{% load banner %}
+
+<div class="b-banner-group">
+	{% for banner in banners %}
+		{% banner_one banner.id %}
+	{% endfor %}
+</div>

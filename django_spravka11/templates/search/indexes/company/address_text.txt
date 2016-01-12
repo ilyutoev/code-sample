@@ -1,0 +1,6 @@
+{{ object.company.name }}
+{{ object.address }}
+{{ object.get_category }}
+{{ object.get_phone }}
+{{ object.company.keywords }}
+{{ object.company.article }}

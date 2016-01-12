@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="page__content">
+        <div class="inner g-clearfix">
+            <div class="inner__content fll">
+                {% block main_content %}
+
+                {% endblock %}
+            </div>
+            <div class="inner__sidebar flr">
+                <div class="sidebar">
+                    {% include "sidebar.html" %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

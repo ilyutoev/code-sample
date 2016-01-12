@@ -1,0 +1,14 @@
+{% extends 'company/vizitka_base.html' %}
+
+{% block title %}{{ object.title }} - {{ company.name }}{% endblock %}
+{% block description %}{{ object.title }} - {{ company.name }}{% endblock %}
+
+{% block vizitka_content %}
+<p class="breadcrumbs"><a href="{% url 'company_detail' company.pk %}" class="breadcrumbs__link">Главная</a> / <a href="{% url 'current_company_service_all' object.company.pk  %}" class="breadcrumbs__link">Товары и услуги</a></p>
+
+<h1 class="block-header">{{ object.title }}<span class="block-header__line"></span></h1>
+
+<div class="news">
+    {% autoescape off %}{{ object.text }}{% endautoescape %}
+</div>
+{% endblock %}

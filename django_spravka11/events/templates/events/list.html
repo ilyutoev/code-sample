@@ -1,0 +1,125 @@
+{% extends 'events/base.html' %}
+
+{% load thumbnail %}
+
+{% block title %}Афиша города Сыктывкара{% endblock %}
+{% block description %}Афиша города Сыктывкара{% endblock %}
+
+{% block main_content %}
+{{ block.super }}
+
+<h1 class="block-header block-header--white">Афиша города Сыктывкара<span class="block-header__line"></span></h1>
+
+{% if session_list %}
+{% regroup session_list by event as event_list %}
+
+{% for event in event_list %}
+<div class="afisha-card {% if forloop.last %}afisha-card--last{% endif %}">
+    <div class="htp">
+        {% if event.list.0.event.poster %}
+        <div class="htp__pic"><a href="{% url 'events_detail' event.list.0.event.pk %}">{% thumbnail event.list.0.event.poster "170x240" crop="center" as im %}<img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">{% endthumbnail %}</a></div>
+        {% endif %}
+        <div class="htp__text">
+        <h2><a href="{% url 'events_detail' event.list.0.event.pk %}">{{ event.grouper }}</a></h2>
+
+        {% if event.list.0.event.ganre or event.list.0.event.limit_year%} <p class="afisha-card__genre">{{ event.list.0.event.ganre }}, {{ event.list.0.event.limit_year }}</p>{% endif %}
+        <p>{{ event.list.0.event.description }}</p>
+        
+        {% regroup event.list by place as place_list %}
+
+        <ul class="where-list">
+        {% for place in place_list %}
+            <li class="where-list__item">
+                <dl class="cinema">
+                    <dt class="cinema__name"><a href="{% url 'events_place' place.list.0.place.pk %}">{{ place.grouper }}</a></dt>
+
+                    <dd class="cinema__time">{% for item in place.list|slice:":4" %}<span title="{{ item.price }} руб.">{{ item.time|date:"G:i" }}</span>{% if not forloop.last %}, {% endif %}{% endfor %}</dd>
+                </dl>
+            </li>
+        {% endfor %}
+        </ul>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+{% else %}
+    Нет мероприятий.
+{% endif %}
+
+
+        
+
+            
+   
+
+{% if page_obj.paginator.num_pages > 1 %}
+    {% load news_extras %}
+   
+    <ul class="pages">
+        <li class="pages__page pages__page--text">Страницы</li>
+        {% if page_obj.has_previous %}
+            {% if rubr %}
+                {% if select_day %}
+                    <li class="pages__page"><a href="{% url 'eventtype_day_list' rubr.pk select_day %}">Первая</a></li>
+                {% else %}
+                    <li class="pages__page"><a href="{% url 'eventtype_list' rubr.pk %}">Первая</a></li>
+                {% endif %}
+            {% else %}
+                {% if select_day %} 
+                    <li class="pages__page"><a href="{% url 'days_list' select_day %}">Первая</a></li>
+                {% else %}
+                    <li class="pages__page"><a href="{% url 'events_list' %}">Первая</a></li>
+                {% endif %}
+            {% endif %}
+        {% endif %}
+
+        {% for page in paginator.page_range|get_before:page_obj.number %}
+            {% if page == 1 %}
+                {% if rubr %}
+                    {% if select_day %}
+                        <li class="pages__page"><a href="{% url 'eventtype_day_list' rubr.pk select_day %}">{{ page }}</a></li>
+                    {% else %}
+                        <li class="pages__page"><a href="{% url 'eventtype_list' rubr.pk %}">{{ page }}</a></li>
+                    {% endif %}
+                {% else %}
+                    {% if select_day %} 
+                        <li class="pages__page"><a href="{% url 'days_list' select_day %}">{{ page }}</a></li>
+                    {% else %}
+                        <li class="pages__page"><a href="{% url 'events_list' %}">{{ page }}</a></li>
+                    {% endif %}
+                {% endif %}
+            {% else %}
+                <li class="pages__page"><a href="?page={{ page }}">{{ page }}</a></li>
+            {% endif %}
+        {% endfor %}
+
+        <li class="pages__page pages__page--active">{{ page_obj.number }}</li>
+
+        {%  for page in paginator.page_range|get_after:page_obj.number %}
+            {% if page == 1 %}
+                {% if rubr %}
+                    {% if select_day %}
+                        <li class="pages__page"><a href="{% url 'eventtype_day_list' rubr.pk select_day %}">{{ page }}</a></li>
+                    {% else %}
+                        <li class="pages__page"><a href="{% url 'eventtype_list' rubr.pk %}">{{ page }}</a></li>
+                    {% endif %}
+                {% else %}
+                    {% if select_day %} 
+                        <li class="pages__page"><a href="{% url 'days_list' select_day %}">{{ page }}</a></li>
+                    {% else %}
+                        <li class="pages__page"><a href="{% url 'events_list' %}">{{ page }}</a></li>
+                    {% endif %}
+                {% endif %}
+            {% else %}
+                <li class="pages__page"><a href="?page={{ page }}">{{ page }}</a></li>
+            {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+            <li class="pages__page"><a href="?page={{ page_obj.paginator.num_pages }}">Последняя</a></li>
+        {% endif %}
+    </ul>
+{% endif %}
+
+{% endblock %}

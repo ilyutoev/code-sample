@@ -1,0 +1,64 @@
+<script>
+    $(document).ready(function(){
+        $(document).on('click', "#call-sendbtn", function(e){
+            e.preventDefault(); //отменяет действия
+            var name = $("input[name=name2]");
+            var tel = $("input[name=tel2]");
+            var email = $("input[name=email2]");
+            var text = $("textarea[name=textfild2]");
+            var company = $("input[name=company2]");
+            $.ajax({
+                url: '/company/form_company_backcall/',
+                type: 'POST',
+                data: {
+                    'name': name.val(),
+                    'tel': tel.val(),
+                    'email': email.val(),
+                    'text': text.val(),
+                    'company': company.val()
+                },
+                success: function(){
+                    $('#call-send_form').replaceWith('<h2 style="text-align:center;">Сообщение отправлено!</h2>');
+                    setTimeout(function() {$("#call-dialog").dialog("close");}, 1500)
+                }
+            });
+        });
+    });     
+</script>
+    <div id="call-dialog" class="dialog">
+        <form class="org-form" action="" method="post" id="call-send_form">
+            <h2>Заказать обратный звонок</h2>
+            <p>Укажите свои контактные данные и интересующую вас информацию, и наши специалисты свяжуться с вами.</p>
+            {% csrf_token %}
+            <dl class="org-form__item org-form__item--m2">
+                <dt class="org-form__name">Ваше имя</dt>
+                <dd class="org-form__field">
+                    <p class="org-form__elem"><input type="text" id="org-form__elem-name" name="name2"/></p>
+                </dd>
+            </dl>
+            <dl class="org-form__item org-form__item--m2">
+                <dt class="org-form__name">Контакты</dt>
+                <dd class="org-form__field">
+                    <p class="org-form__elem"><input type="text" id="org-form__elem-name" name="tel2"/></p>
+                </dd>
+            </dl>
+            <dl class="org-form__item org-form__item--m2">
+                <dt class="org-form__name">E-mail</dt>
+                <dd class="org-form__field">
+                    <p class="org-form__elem"><input type="text" name="email2"/></p>
+                </dd>
+            </dl>
+            <dl class="org-form__item org-form__item--m2">
+                <dt class="org-form__name">Сообщение</dt>
+                <dd class="org-form__field">
+                    <p class="org-form__elem org-form__elem--textarea"><textarea cols="1" rows="1" name="textfild2"></textarea></p>
+                </dd>
+            </dl>
+            <input type="hidden" name="company2" value="{{ company.pk }}">
+            <div class="org-form__submit">
+                <div class="button">
+                    <p class="button__content button__content--blue">Отправить<input type="submit" id="call-sendbtn" value=" " /></p>
+                </div>
+            </div>
+        </form>
+    </div>

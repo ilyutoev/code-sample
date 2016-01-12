@@ -1,0 +1,44 @@
+{% extends 'company/base.html' %}
+
+{% load mptt_tags %}
+
+{% block title %}{% if leter %}Рубрики на букву {{ leter }}. {% endif%}Алфавитный каталог рубрик справочника компаний Сыктывкара - spravka11.ru{% endblock %}
+{% block description %}{% if leter %}Буква {{ leter }}. {% endif%}Алфавитный каталог рубрик справочника компаний Сыктывкара - spravka11.ru{% endblock %}
+
+{% block main_content %}
+
+<p class="breadcrumbs"><a href="{% url 'index' %}" class="breadcrumbs__link" >Главная</a></p>
+
+<h1 class="block-header">{% if leter == 'Все' %}Все рубрики{% else %}Рубрики на букву {{ leter }}{% endif %}<span class="block-header__line"></span></h1>
+
+    {% if category_list %}
+        {% for cat in category_list %}
+            <p><a href="{% url 'companylist' cat.pk %}">{{ cat.name }}</a></p>
+        {% endfor %}
+    {% else %}
+        <p>Категорий нет</p>
+    {% endif %}
+
+    <div class="alphabet">
+        <h4 class="alphabet__header">Алфавитный поиск товаров и услуг</h4>
+        <ul class="alphabet-letters">
+        {% spaceless %}
+        {% for key,value in abc.items %}
+            {% if key == 30 %}
+                {% if value == leter %}
+                    <li class="alphabet-letters__letter alphabet-letters__letter--all alphabet-letters__letter--active">{{ value }}</li>
+                {% else %}
+                    <li class="alphabet-letters__letter alphabet-letters__letter--all"><a href="{% url 'categoryabclist' key %}">{{ value }}</a></li>
+                {% endif %}
+            {% else %}
+                {% if value == leter %}
+                    <li class="alphabet-letters__letter alphabet-letters__letter--active">{{ value }}</li>
+                {% else %}
+                    <li class="alphabet-letters__letter"><a href="{% url 'categoryabclist' key %}">{{ value }}</a></li>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+        {% endspaceless %}
+        </ul>
+    </div>
+{% endblock %}

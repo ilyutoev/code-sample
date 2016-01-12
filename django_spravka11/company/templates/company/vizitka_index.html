@@ -1,0 +1,51 @@
+{% extends 'company/vizitka_base.html' %}
+
+{% load thumbnail %}
+{% load disqus_tags %}
+{% set_disqus_identifier "company_" company.pk %}
+
+{% block title %}{{ company.name }}{% endblock %}
+{% block description %}{{ company.name }}{% endblock %}
+
+{% block vizitka_content %}
+                <h1 class="block-header">{{ company.name }}<span class="block-header__line"></span></h1>
+                
+                <p>{{ company.keywords }}</p>
+
+                {% autoescape off %}{{ company.article }}{% endautoescape %}
+
+                {% if company.companyservice_set.all %}
+                    <h2 class="block-header fll">Товары и услуги<span class="block-header__line"></span></h2>
+                    <div class="allitems fll" style="left:30px;">
+                        <div class="arrow arrow--white"><a href="{% url 'current_company_service_all' company.pk  %}">Все товары и услуги</a><div class="arrow__right arrow__right--white"></div></div>
+                    </div><br class="clear" />
+                    <ul class="goods-list h-list g-clearfix">
+                    {% for service in company.companyservice_set.all %}
+                        <li class="h-list__item">
+                            <div class="vtp">
+                                <div class="vtp__pic"><a href="{% url 'current_company_service_detail' company.pk service.pk %}">{% thumbnail service.image "100x100" crop="center" as im %}<img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">{% endthumbnail %}</a><br /></div>
+                                <div class="vtp__text"><a class="h-list__text" href="{% url 'current_company_service_detail' company.pk service.pk %}">{{ service.title }}</a></div>
+                            </div>
+                        </li>
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+
+                {% if company.companyimage_set.all %}
+                    <h2 class="block-header fll">Фототур<span class="block-header__line"></span></h2>
+                    <div class="allitems fll" style="left:30px;">
+                        <div class="arrow arrow--white"><a href="{% url 'current_company_photo' company.pk %}">Посмотреть весь фототур</a><div class="arrow__right arrow__right--white"></div></div>
+                    </div><br class="clear" />
+                    <ul class="h-list h-list--small-photo">
+                    {% for img in company.companyimage_set.all %}
+                        {% thumbnail img.image "100x100" crop="center" as im %}
+                            <li class="h-list__item"><a href="{{ img.image.url }}"><img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}"></a></li>
+                        {% endthumbnail %}
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+
+                <h2 class="block-header fll">Отзывы<span class="block-header__line"></span></h2>
+                {% disqus_show_comments %}
+
+{% endblock %}

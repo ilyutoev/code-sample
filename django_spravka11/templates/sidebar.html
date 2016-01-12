@@ -1,0 +1,12 @@
+{% load banner %}
+{% load misc_template_tag %}
+
+{% if not afisha_menu %}
+    {% weather %}
+{% endif %}
+
+{% banner_group 'sidebar' 'group_sidebar.html' %}
+
+<div class="sidebar-tie">
+    <span class="sidebar-tie__place"></span>
+</div>

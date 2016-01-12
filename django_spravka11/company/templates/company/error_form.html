@@ -1,0 +1,64 @@
+<script>
+    $(document).ready(function(){
+        $(document).on('click', "#sendbtn", function(e){
+            e.preventDefault(); //отменяет действия
+            var name = $("input[name=name]");
+            var tel = $("input[name=tel]");
+            var email = $("input[name=email]");
+            var text = $("textarea[name=textfild]");
+            var company = $("input[name=company]");
+            $.ajax({
+                url: '/company/form_company_error/',
+                type: 'POST',
+                data: {
+                    'name': name.val(),
+                    'tel': tel.val(),
+                    'email': email.val(),
+                    'text': text.val(),
+                    'company': company.val()
+                },
+                success: function(){
+                    $('#send_form').replaceWith('<h2 style="text-align:center;">Сообщение отправлено!</h2>');
+                    setTimeout(function() {$("#dialog").dialog("close");}, 1500)
+                }
+            });
+        });
+    });     
+</script>
+<!--$("#dialog").dialog("close");-->
+    <div id="dialog" class="dialog">
+        <form class="org-form" action="" method="post" id="send_form">
+            <h2>Отправить сообщение об ошибке:</h2>
+            {% csrf_token %}
+            <dl class="org-form__item org-form__item--m2">
+                <dt class="org-form__name">Ваше имя</dt>
+                <dd class="org-form__field">
+                    <p class="org-form__elem"><input type="text" id="org-form__elem-name" name="name"/></p>
+                </dd>
+            </dl>
+            <dl class="org-form__item org-form__item--m2">
+                <dt class="org-form__name">Телефон</dt>
+                <dd class="org-form__field">
+                    <p class="org-form__elem"><input type="text" id="org-form__elem-name" name="tel"/></p>
+                </dd>
+            </dl>
+            <dl class="org-form__item org-form__item--m2">
+                <dt class="org-form__name">E-mail</dt>
+                <dd class="org-form__field">
+                    <p class="org-form__elem"><input type="text" name="email"/></p>
+                </dd>
+            </dl>
+            <dl class="org-form__item org-form__item--m2">
+                <dt class="org-form__name">Описание ошибки</dt>
+                <dd class="org-form__field">
+                    <p class="org-form__elem org-form__elem--textarea"><textarea cols="1" rows="1" name="textfild"></textarea></p>
+                </dd>
+            </dl>
+            <input type="hidden" name="company" value="{{ company }}">
+            <div class="org-form__submit">
+                <div class="button">
+                    <p class="button__content button__content--blue">Отправить<input type="submit" id="sendbtn" value=" " /></p>
+                </div>
+            </div>
+        </form>
+    </div>

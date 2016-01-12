@@ -1,0 +1,20 @@
+{% extends 'admin/base_site.html' %}
+
+{% block content_title %}<h1>Импорт компаний</h1>{% endblock %}
+
+{% block content %}
+
+{% if is_file %}
+    <p>Файл для импорта успешно загружен.</p>
+    <p>Импорт происходит автоматически раз в пол часа. Вы получите сообщение о заврешении импорта по электронной почте.</p>
+{% endif %}
+
+{% if not is_file %}
+<form action="/admin/company_import/" method="post" enctype="multipart/form-data">
+    {% csrf_token%}
+    {{form}}
+    <br/><input type="submit" value="Загрузить">
+</form>
+
+{% endif %}
+{% endblock %}

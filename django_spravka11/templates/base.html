@@ -1,0 +1,86 @@
+{% load staticfiles %}
+
+{% load banner %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+    <title>{% block title %}{% endblock %}</title>
+    <meta name="description" content="{% block description %}Справочник компаний Сыктывкара{% endblock %}" />
+    {% include "header.html" %}
+    </head>
+<body class="index page {% if afisha_menu %}afisha{% endif %}">
+
+    {% banner_group 'top_site_banners' 'group_top_site.html' %}
+
+    {% include "head_nav.html" %}
+
+    <div class="page__header">
+        <div class="inner">
+            {% if afisha_menu %}
+            <div class="page__header">
+                <div class="inner">
+                    <div class="header">
+                        <div class="header__logo"><a href="{% url 'index' %}"><img src="/static/images/header/logow.png" width="" height="" alt="" /></a></div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="header">
+                <div class="header__logo"><a href="{% url 'index' %}"><img src="/static/images/header/logo.png" width="" height="" alt="" /></a></div>
+                <div class="header__search">
+                    <div class="header-search">
+                        <form action="/company/search/" method="GET" id="searchform">
+                            {% csrf_token %}
+                            <div class="header-search__input"><input type="text" name="q" id="id_q" {% if q %}value="{{ q }}"{% endif %}/><a href="" class="header-search__remove"></a></div>
+                            <div class="header-search__choose select-replacement">
+                                <select name="city" class="select-replacement__select">
+                                    <option {% if city %}{% if city == 'Сыктывкар' %}selected{% endif %}{% endif %} value="Сыктывкар">Сыктывкар</option>
+                                    <option {% if city %}{% if city == 'Воркута' %}selected{% endif %}{% endif %} value="Воркута">Воркута</option>
+                                    <option {% if city %}{% if city == 'Инта' %}selected{% endif %}{% endif %} value="Инта">Инта</option>
+                                    <option {% if city %}{% if city == 'Печора' %}selected{% endif %}{% endif %} value="Печора">Печора</option>
+                                    <option {% if city %}{% if city == 'Усинск' %}selected{% endif %}{% endif %} value="Усинск">Усинск</option>
+                                    <option {% if city %}{% if city == 'Ухта' %}selected{% endif %}{% endif %} value="Ухта">Ухта</option>
+                                </select>
+                            </div>
+                            <div class="header-search__submit">
+                                <input type="submit" value="Найти" />
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <p class="header__add-org"><a href="{% url 'add_company' %}">+ Добавить организацию</a></p>
+            </div>
+            {% endif %}
+            
+        </div>
+    </div>
+
+    {% block content %}{% endblock %}
+
+    {% include "footer.html" %}
+
+    {% if is_index %}
+    <div class="helper-sidebar">
+        <div class="sidebar">
+
+            {% include "sidebar.html" %}
+
+        </div>
+    </div>
+    {% endif %}
+
+    <script type="text/javascript">
+        $(function() {
+          $("#id_q").autocomplete({
+            source: "/company/search/autocomplete/",
+            minLength: 3,
+            select: function(event, ui) { 
+                $("input#id_q").val(ui.item.value);
+                $("#searchform").submit();
+            }
+          });
+        });
+    </script>    
+</body>
+</html>

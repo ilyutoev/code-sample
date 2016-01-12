@@ -1,0 +1,9 @@
+{% load banner %}
+
+<div class="page__banners">
+    <ul class="banners">
+    {% for banner in banners %}
+        {% banner_one banner.id 'banner_top_site.html' %}
+    {% endfor %}
+    </ul>
+</div>

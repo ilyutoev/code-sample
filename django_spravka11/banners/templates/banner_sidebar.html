@@ -1,0 +1,34 @@
+{% if banner.html %}
+    {% load banner %}
+    <div id='banner_{{ banner.id }}' class='b-banner'> 
+        {% render banner.text %}
+    </div>
+{% elif banner.flash %}
+    <div id='banner_{{ banner.id }}' class='b-banner'> 
+        <object classid='clsid:D27CDB6E-AE6D-11cf-96B8-444553540000'
+            codebase='http://fpdownload.adobe.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,0,0'
+            width='{{ banner.width }}' height='{{ banner.height }}'>
+            <param name='movie' value='{{ banner.img.url }}' /> 
+            <param name='quality' value='high'>
+            <param name='play' value='true'>
+            <param name='loop' value='true'>
+            <param name='wmode' value='transparent'>
+            <embed src='{{ banner.img.url }}'
+                quality='high'
+                bgcolor='#d0f'
+                width='{{ banner.width }}'
+                height='{{ banner.height }}'
+                type='application/x-shockwave-flash' 
+                play='true'
+                loop='true'
+                wmode='transparent'
+                pluginspage='http://www.adobe.com/shockwave/download/index.cgi?P1_Prod_Version=ShockwaveFlash'
+            >
+            </embed>
+        </object>
+    </div>
+{% else %}
+    <a href='{{ banner.url }}' id='banner_{{ banner.id }}' class='b-banner' target="_blank">
+        <img src='{{ banner.img.url }}' alt='{{ banner.alt }}' title='{{ banner.title }}' width='250'>
+    </a>
+{% endif %}

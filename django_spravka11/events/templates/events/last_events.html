@@ -1,0 +1,29 @@
+{% load thumbnail %}
+
+<div class="index__afisha">
+    <div class="inner">
+        <div class="inner__content">
+            <div class="main-afisha">
+                <h2 class="block-header block-header--white fll">Афиша<span class="block-header__line"></span></h2>
+                <div class="allitems fll">
+                    <div class="arrow arrow--white"><a href="{% url 'events_list' %}">Все события</a><div class="arrow__right arrow__right--white"></div></div>
+                </div><br class="clear" />
+                <ul class="object-list object-list--active-border-orange g-clearfix">
+
+                    {% for ses in ev %}
+                        <li class="object-list__item">
+                            {% if ses.event__poster__min %}
+                                {% thumbnail ses.event__poster__min "142x210" crop="center" as im %}
+                                    <p><img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}"></p>
+                                {% endthumbnail %}
+                            {% endif %}
+                            <h3><a href="{% url 'events_detail' ses.event %}">{{ ses.event__title__min }}</a></h3>
+                            {{ ses.date__min|date:"d E Y"|lower }}
+                        </li>
+                    {% endfor %}
+                    
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

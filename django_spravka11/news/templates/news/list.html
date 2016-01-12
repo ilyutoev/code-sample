@@ -1,0 +1,82 @@
+{% extends 'base_second.html' %}
+
+{% load thumbnail %}
+{% load news_template_tag %}
+
+{% block title %}Новости Республики Коми{% endblock %}
+{% block description %}Новости Республики Коми{% endblock %}
+
+{% block main_content %}
+
+{% category_list_menu %}
+
+<p class="breadcrumbs"><a href="{% url 'index' %}" class="breadcrumbs__link" >Главная</a></p>
+
+{% if category_name %}
+    <h1 class="block-header">Рубрика: {{ category_name }}<span class="block-header__line"></span></h1>
+{% else %}
+    <h1 class="block-header">Новости Республики Коми<span class="block-header__line"></span></h1>
+{% endif %}
+
+
+<div class="news">
+{% if object_list %}
+    <ul class="news-list">
+    {% for news in object_list %}
+        <li class="news-list__item">
+            <div class="news-item">
+                {% if news.photo %}
+                <div class="news-list__image"><a href="{% url 'news_detail' news.id %}">{% thumbnail news.photo "142x95" crop="center" as im %}<img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">{% endthumbnail %}</a></div>
+                {% endif %}
+                <div class="news-list__content">
+                    <p class="news-item__date">{{ news.pub_date|date:"j E Y"|lower }}</p>
+                    <h3 class="news-item__header"><a href="{% url 'news_detail' news.id %}">{{ news.title }}</a></h3>
+                    <p class="news-item__text">{{ news.announcement }}</p>
+                    <p class="news-item__text"><a href="{% url 'news_category' news.category.slug %}">{{ news.category.name }}</a></p>
+                </div>
+            </div>
+        </li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>Новостей нет</p>
+{% endif %}
+</div>
+
+{% if page_obj.paginator.num_pages > 1 %}
+    {% load news_extras %}
+    <hr class="divider" />
+    
+    <ul class="pages">
+        <li class="pages__page pages__page--text">Страницы</li>
+        {% if page_obj.has_previous %}
+            <li class="pages__page"><a href="{% url 'news_list' %}">Первая</a></li>
+        {% endif %}
+        {% if page_obj.has_previous %}
+            {% if page_obj.previous_page_number == 1 %}
+                <li class="pages__page"><a href="{% url 'news_list' %}">«</a></li>
+            {% else %}
+                <li class="pages__page"><a href="?page={{ page_obj.previous_page_number }}">«</a></li>
+            {% endif %}
+        {% endif %}
+        {% for page in paginator.page_range|get_before:page_obj.number %}
+            {% if page == 1 %}
+                <li class="pages__page"><a href="{% url 'news_list' %}">{{ page }}</a></li>
+            {% else %}
+                <li class="pages__page"><a href="?page={{ page }}">{{ page }}</a></li>
+            {% endif %}
+        {% endfor %}
+        <li class="pages__page pages__page--active">{{ page_obj.number }}</li>
+        {%  for page in paginator.page_range|get_after:page_obj.number %}
+            <li class="pages__page"><a href="?page={{ page }}">{{ page }}</a></li>
+        {% endfor %}
+        {% if page_obj.has_next %}
+            <li class="pages__page"><a href="?page={{ page_obj.next_page_number }}">»</a></li>
+        {% endif %}
+        {% if page_obj.has_next %}
+            <li class="pages__page"><a href="?page={{ page_obj.paginator.num_pages }}">Последняя</a></li>
+        {% endif %}
+    </ul>
+{% endif %}
+
+{% endblock %}

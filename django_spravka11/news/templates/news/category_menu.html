@@ -1,0 +1,7 @@
+<div class="switch-wrap" style="border-bottom:none;">
+    <ul class="switch">
+        {% for cat in category_list %}
+            <li class="switch__item"><a href="{% url 'news_category' cat.slug %}">{{ cat.name}}</a></li>
+        {% endfor %}
+    </ul>
+</div>

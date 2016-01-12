@@ -1,0 +1,21 @@
+{% extends 'base_second.html' %}
+
+{% load news_template_tag %}
+
+{% block title %}{{ news.title }}{% endblock %}
+{% block description %}{{ news.title }}{% endblock %}
+
+{% block main_content %}
+
+{% category_list_menu %}
+
+<p class="breadcrumbs"><a href="{% url 'index' %}" class="breadcrumbs__link" >Главная</a> / <a href="{% url 'news_list' %}" class="breadcrumbs__link">Новости</a></p>
+
+<h1 class="block-header">{{ news.title }}<span class="block-header__line"></span></h1>
+
+<div class="news">
+    {% autoescape off %}{{ news.text }}{% endautoescape %}
+    <p class="news-item__date">{{ news.pub_date|date:"j E Y"|lower }}</p>
+    <p class="news-item__date"><a href="{% url 'news_category' news.category.slug %}">{{ news.category.name }}</a></p>
+</div>
+{% endblock %}

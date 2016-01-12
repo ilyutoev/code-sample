@@ -1,0 +1,12 @@
+{% extends 'base_second.html' %}
+
+{% block main_content %}
+
+<p class="breadcrumbs"><a href="{% url 'index' %}" class="breadcrumbs__link" >Главная</a></p>
+
+<h1 class="block-header">{{ flatpage.title }}<span class="block-header__line"></span></h1>
+
+<div class="news">
+    {% autoescape off %}{{ flatpage.content }}{% endautoescape %}
+</div>
+{% endblock %}

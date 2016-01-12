@@ -1,0 +1,147 @@
+{% extends 'company/base.html' %}
+
+{% block title %}Добавить организацию{% endblock %}
+{% block description %}Добавить организацию{% endblock %}
+
+{% block main_content %}
+
+<p class="breadcrumbs"><a href="{% url 'index' %}" class="breadcrumbs__link" >Главная</a></p>
+
+<h1 class="block-header">Добавить организацию<span class="block-header__line"></span></h1>
+
+{% if thanks%}
+    Ваше собщение отправлено!
+{% else %}
+<div class="org-add">
+    <h6>— Вы не нашли свою компанию в справочнике организаций Республики Коми?</h6>
+    <p>Добавьте ее одним из нижеперечисленных способов:</p>
+    <ol>
+        <li><h6>VIP-размещение от 1 000 руб. в месяц</h6>
+            <p>Данный формат размещения позволит привлечь больше клиентов и приоритетно выбрать Вашу компанию.<br />
+            Карточки компаний с VIP-размещением привлекают внимание пользователей фотографиями, ключевыми словами и развернутыми статьями о своих товарах и услугах и получают максимальное количество просмотров.<br />
+            <a href="/page/capability/">Узнайте подробнее о VIP-размещении.</a><br />
+            Или позвоните по телефону (8212) 200-532 и мы поможем Вам разработать систему привлечения клиентов и увеличения объема продаж Вашей компании с помощью VIP-размещения на интернет-портале spravka11.ru.</p>
+        </li>
+        <li><h6>Бесплатное размещение</h6>
+            <p>Заполните анкету и отправьте информацию о Вашей фирме.<br />
+            Обязательным условием для бесплатного включения компании в справочник организаций<br />
+            Республики Коми является размещение на Вашем web-сайте баннера.<br />
+            <img src="/static/images/org-add/extbanner.png" width="128" height="49" alt="" />
+            </p>
+            <p>html-код для вставки:<br />
+            <span class="code2ext">&lt;a href=&quot;http://www.spravka11.ru/&quot;&gt;&lt;img src=&quot;http://spravka11.ru/static/images/org-add/extbanner.png&quot;&gt;&lt;/a&gt;</span>
+            </p>
+        </li>
+    </ol>
+    <p>По вопросам размещения информации обращайтесь по телефонам:</p>
+    <div class="info-phone">
+        <dl class="info-phone__item">
+            <dt class="info-phone__city">в Сыктывкаре</dt>
+            <dd class="info-phone__phone">(8212) 200-532<br />200-697<br />8 (922) 272-17-70</dd>
+        </dl>
+        <dl class="info-phone__item">
+            <dt class="info-phone__city">в Ухте</dt>
+            <dd class="info-phone__phone">(8216) 79-42-81</dd>
+        </dl>
+        <dl class="info-phone__item">
+            <dt class="info-phone__city">в Воркуте</dt>
+            <dd class="info-phone__phone">8 (912) 106-89-44</dd>
+        </dl>
+        <dl class="info-phone__item">
+            <dt class="info-phone__city">в Печоре</dt>
+            <dd class="info-phone__phone">8 (922) 270-00-01</dd>
+        </dl>
+    </div>
+</div>
+
+<h2 class="block-header">Анкета организации<span class="block-header__line"></span></h2>
+<div class="org-profile">
+                
+    <form class="org-form" action="/company/add_company/" method="post">
+    {% csrf_token %}
+        <dl class="org-form__item org-form__item--m2">
+            <dt class="org-form__name"><label for="org-form__elem-name">Название</label></dt>
+            <dd class="org-form__field">
+                <p class="org-form__elem"><input type="text" id="org-form__elem-name" name="name" /></p>
+            </dd>
+        </dl>
+        <dl class="org-form__item org-form__item--m1">
+            <dt class="org-form__name"><label for="org-form__elem-working">Описание сферы деятельности<br /><span class="org-form__small-text">в свободной форме</span></label></dt>
+            <dd class="org-form__field">
+                <p class="org-form__elem org-form__elem--textarea"><textarea cols="1" rows="1" id="org-form__elem-working" name="work">Кратко опишите сферы деятельности Вашей компании</textarea></p>
+            </dd>
+        </dl>
+        <dl class="org-form__item org-form__item--m2">
+            <dt class="org-form__name"><label for="org-form__elem-rubric">Рубрика</label></dt>
+            <dd class="org-form__field">
+                <p class="org-form__elem select-replacement">
+                    <select class="select-replacement__select" name="cat">
+                    {% for cat in category %}
+                        <option value="{{cat}}">{{ cat }}</option>
+                    {% endfor %}
+                    </select>
+                </p>
+            </dd>
+        </dl>
+        <input type="hidden" id="org-allinfo" value="" name="addressess"/>
+        <div class="org-form__address">
+                            <p class="org-form__address-action"><a href="" class="org-form__address-action--add"><span class="plus">+</span>&nbsp;Добавить адрес</a></p>
+                            <dl class="org-form__item org-form__item--m1">
+                                <dt class="org-form__name">Адрес</dt>
+                                <dd class="org-form__field">
+                                    <p class="org-form__elem org-form__elem--textarea"><textarea cols="1" rows="1" class="org-address"></textarea></p>
+                                </dd>
+                            </dl>
+                            <dl class="org-form__item org-form__item--m1">
+                                <dt class="org-form__name">Телефон / факс</dt>
+                                <dd class="org-form__field">
+                                    <p class="org-form__elem"><input type="text" class="org-phone"/></p>
+                                </dd>
+                            </dl>
+                            <dl class="org-form__item org-form__item--m1">
+                                <dt class="org-form__name">Режим работы</dt>
+                                <dd class="org-form__field">
+                                    <p class="org-form__elem"><input type="text" class="org-timework" /></p>
+                                </dd>
+                            </dl>
+                        </div>
+        <dl class="org-form__item org-form__item--m1">
+            <dt class="org-form__name">Электронная почта</dt>
+            <dd class="org-form__field">
+                <p class="org-form__elem"><input type="text" name="email"/></p>
+            </dd>
+        </dl>
+        <dl class="org-form__item org-form__item--m2">
+            <dt class="org-form__name">Сайт</dt>
+            <dd class="org-form__field">
+                <p class="org-form__elem"><input type="text" name="web"/></p>
+            </dd>
+        </dl>
+        <dl class="org-form__item org-form__item--m2">
+            <dt class="org-form__name">Комментарии</dt>
+            <dd class="org-form__field">
+                <p class="org-form__elem org-form__elem--textarea"><textarea cols="1" rows="1" name="comment">Кратко опишите сферы деятельности Вашей компании</textarea></p>
+            </dd>
+        </dl>
+        <dl class="org-form__item org-form__item--m2">
+            <dt class="org-form__name">Ваше имя</dt>
+            <dd class="org-form__field">
+                <p class="org-form__elem"><input type="text" name="fio"/></p>
+            </dd>
+        </dl>
+        <dl class="org-form__item org-form__item--m2">
+            <dt class="org-form__name">Ваши контактные данные</dt>
+            <dd class="org-form__field org-form__field--short">
+                <p class="org-form__elem org-form__elem--textarea"><textarea cols="1" rows="1" name="contact">Оставьте телефон, адрес электронной почты для связи с Вами оператора spravka11</textarea></p>
+            </dd>
+        </dl>
+        <hr class="org-form__divider" />
+        <div class="org-form__submit">
+            <div class="button">
+                <p class="button__content button__content--blue">Добавить организацию<input type="submit" value="" /></p>
+            </div>
+        </div>
+    </form>
+</div>
+{% endif %}
+{% endblock %}

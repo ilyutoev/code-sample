@@ -1,0 +1,28 @@
+{% load thumbnail %}
+
+<div class="index__news">
+    <div class="inner">
+        <div class="inner__content">
+            <h2 class="block-header fll">Новости Республики Коми<span class="block-header__line"></span></h2>
+            <div class="allitems fll">
+                <div class="arrow"><a href="{% url 'news_list' %}">Все новости</a><div class="arrow__right"></div></div>
+            </div><br class="clear" />
+            <div class="main-news">
+                <ul class="object-list object-list--active-border-orange g-clearfix">
+                    {% for news in news_list %}
+                        <li class="object-list__item">
+                        {% if news.photo %}
+                            {% thumbnail news.photo "142x95" crop="center" as im %}
+                                <p><img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}"></p>
+                            {% endthumbnail %}
+                        {% endif %}
+                        <h3><a href="{% url 'news_detail' news.pk %}">{{ news.title}}</a></h3>
+                        <p>{{ news.pub_date|date:"j E Y"|lower }}</p>
+                        <p>{{ news.announcement|truncatewords:15 }}</p>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

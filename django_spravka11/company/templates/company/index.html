@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+{% load mptt_tags %}
+
+{% load news_template_tag %}
+{% load event_template_tag %}
+{% load company_template_tag %}
+
+{% load banner %}
+
+{% block title %}Справочник организаций Республики Коми - spravka11.ru{% endblock %}
+{% block description %}Справочник организаций Республики Коми - spravka11.ru{% endblock %}
+
+{% block content %}
+
+    <!--Основная часть-->
+    <div class="page__content">
+        <div class="inner">
+            <div class="inner__content">
+                <h2 class="block-header">Справочник организаций<br />Республики Коми<span class="block-header__line"></span></h2>
+                <!--Каталог-->
+                <div class="catalog">
+                    <div class="catalog__column fll" style="margin:0 50px 0 0">
+                        <ul class="catalog-list">
+                    {% recursetree category1 %}
+                        {% if node.level == 0 %}
+                            <li class="catalog-list__item">
+                                <div class="catalog-entry">
+                                    <span class="catalog-entry__icon">{% if node.ico %}<img src="{{ node.ico.url }}" alt="" />{% endif %}</span>
+                                    <h3 class="catalog-entry__header">{{ node.name }}</h3>
+                        {% endif %}
+
+                        {% if node.level == 1 %}
+                            <li class="useful-list__item"><p class="catalog-entry__h"><span class="bbdb">{{ node.name }}</span></p>
+                        {% endif %}
+
+                        {% if node.level == 2 %}
+                            <a href="{% url 'companylist' node.pk %}">{{ node.name }}</a>
+                            {% if node.get_next_sibling %}
+                                <span class="bullet">&bull;</span>
+                            {% endif %}
+                        {% endif %}
+
+                        {% if not node.is_leaf_node %}
+                            {% if node.level == 0 %}
+                                <ul class="catalog-entry__useful useful-list">
+                                    {{ children }}
+                                </ul>
+                            {% elif node.level == 1 %}
+                                <p class="catalog-entry__rubrics">
+                                    {{ children }}
+                                </p>
+                            {% endif %}
+                        {% endif %}
+
+                        {% if node.level == 0 %}
+                                </div>
+                            </li>
+                        {% endif %}
+                    {% endrecursetree %}
+                                
+                        </ul>
+                    </div>
+                    <div class="catalog__column fll">
+                        <ul class="catalog-list">
+                           
+                    {% recursetree category2 %}
+                        {% if node.level == 0 %}
+                            <li class="catalog-list__item">
+                                <div class="catalog-entry">
+                                    <span class="catalog-entry__icon">{% if node.ico %}<img src="{{ node.ico.url }}" alt="" />{% endif %}</span>
+                                    <h3 class="catalog-entry__header">{{ node.name }}</h3>
+                        {% endif %}
+
+                        {% if node.level == 1 %}
+                            <li class="useful-list__item"><p class="catalog-entry__h"><span class="bbdb">{{ node.name }}</span></p>
+                        {% endif %}
+
+                        {% if node.level == 2 %}
+                            <a href="{% url 'companylist' node.pk %}">{{ node.name }}</a>
+                            {% if node.get_next_sibling %}
+                                <span class="bullet">&bull;</span>
+                            {% endif %}
+                        {% endif %}
+
+                        {% if not node.is_leaf_node %}
+                            {% if node.level == 0 %}
+                                <ul class="catalog-entry__useful useful-list">
+                                    {{ children }}
+                                </ul>
+                            {% elif node.level == 1 %}
+                                <p class="catalog-entry__rubrics">
+                                    {{ children }}
+                                </p>
+                            {% endif %}
+                        {% endif %}
+
+                        {% if node.level == 0 %}
+                                </div>
+                            </li>
+                        {% endif %}
+                    {% endrecursetree %}
+
+                        </ul>
+                    </div>
+                </div>
+                <!--Алфавит-->
+                <div class="alphabet">
+                    <h4 class="alphabet__header">Алфавитный поиск товаров и услуг</h4>
+                    <ul class="alphabet-letters">
+
+                        {% for key,value in abc.items %}
+                            {% if key == 30 %}
+                                <li class="alphabet-letters__letter alphabet-letters__letter--all"><a href="{% url 'categoryabclist' key %}">{{ value }}</a></li>
+                            {% else %}
+                                <li class="alphabet-letters__letter"><a href="{% url 'categoryabclist' key %}">{{ value }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--Картинка города-->
+    <div class="index__city"></div>
+    <!--Новости на главной-->
+
+    {% last_news %}
+
+    <!--Афиша на главной-->
+
+    {% last_events %}
+
+    <!--Новости компаний на главной-->
+
+    {% company_news_list %}
+    
+    <!--Блок баннеры для всех страниц-->
+
+    {% banner_group 'bottom_banners' 'group_bottom.html' %}
+
+    <!--Рекомендуемые компании на главной-->
+
+    <div class="index__company-recommend">
+        <div class="inner">
+            <div class="inner__content">
+                <div class="main-company-recommend">
+                    <h2 class="block-header">Рекомендуемые компании<span class="block-header__line"></span></h2>
+                    <div class="slider-wrap">
+                        <div class="slider-wrap__prev">
+                            <a href="#" class="slider-control slider-control--prev"><span class="prev"></span></a>
+                        </div>
+                        <div class="slider-wrap__next">
+                            <a href="#" class="slider-control slider-control--next"><span class="next"></span></a>
+                        </div>
+                        <ul class="slider-list">
+                            {% for company_group in logo_company %}
+                                <li class="slider-list__item">
+                                    {% for company in company_group %}
+                                        <div class="htp">
+                                            <div class="htp__pic"><a href="{% url 'company_detail' company.pk %}"><img src="/media/{{ company.logo }}" width="108" height="48" alt="" /></a></div>
+                                        <div class="htp__text">
+                                            <p><a href="{% url 'company_detail' company.pk %}">{{ company.name }}</a></p>
+                                        </div>
+                                        <div class="htp__text2"><p>{{ company.recomendationtext }}</p></div>
+                                        </div>
+                                    {% endfor %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+{% endblock %}

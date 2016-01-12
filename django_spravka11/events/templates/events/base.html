@@ -1,0 +1,9 @@
+{% extends 'base_second.html' %}
+
+{% load event_template_tag %}
+
+{% block main_content %}
+
+{% eventtype_list_menu rubr.pk select_day %}
+
+{% endblock %}

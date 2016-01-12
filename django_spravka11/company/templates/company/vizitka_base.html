@@ -1,0 +1,197 @@
+{% load thumbnail %}
+
+{% load company_template_tag %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}{% endblock %}</title>
+    <meta name="description" content="{% block description %}{% endblock %}" />
+    {% include "header.html" %}
+</head>
+<body class="page site">
+    <!--Навигация-->
+    {% include "head_nav.html" %}
+    <!--Шапка сайт-визитка-->
+
+    {% if company.img_vizitka %}
+    <div class="inner g-clearfix">
+        <img src="{{ company.img_vizitka.url }}" style="margin-top:-17px;" />
+    </div>
+
+    {% else %}
+    <div class="site__header">
+        <div class="inner g-clearfix">
+            <div class="site-header">
+                {% if company.logo %}
+                    <div class="site-header__logo">
+                        <a href="{% url 'company_detail' company.pk %}"><img src="{{ company.logo.url }}" width="108" height="48" /></a>
+                    </div>
+                {% endif %}
+                
+                <div class="site-header__stat">
+                    Просмотров {{ company.counter }}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    <!--Навигация сайт-визитка-->
+    <div class="site__nav">
+        <div class="inner g-clearfix">
+            <ul class="site-nav">
+                <li class="site-nav__item"><a href="{% url 'company_detail' company.pk %}">ГЛАВНАЯ</a></li>
+                {% if company.companyservice_set.all %}
+                <li class="site-nav__item"><a href="{% url 'current_company_service_all' company.pk  %}">ТОВАРЫ И УСЛУГИ</a></li>
+                {% endif %}
+                {% if company.companyimage_set.all %}
+                <li class="site-nav__item"><a href="{% url 'current_company_photo' company.pk  %}">ФОТОТУР</a></li>
+                {% endif %}
+                {% if company.companynews_set.all %}
+                <li class="site-nav__item"><a href="{% url 'current_company_news_all' company.pk  %}">НОВОСТИ</a></li>
+                {% endif %}
+                {% if company.page_for_vizitka %}
+                    {% for page in company.page_for_vizitka %}
+                        <li class="site-nav__item"><a href="{% url 'current_company_page' company.pk page.slug %}">{{ page.title_menu|upper }}</a></li>
+                    {% endfor %}
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+    <!--Основная часть-->
+    <div class="page__content">
+        <div class="inner g-clearfix">
+            <div class="inner__content fll">
+            {% block vizitka_content %}
+
+            {% endblock %}
+            </div>
+            <div class="inner__sidebar flr">
+
+                {% if company.email %}
+                <div class="card__buttons" style="margin-top:15px;">
+                    <div class="button-link button-link--blue">
+                        <a id="call-dialog-control" href="#">Заказать обратный звонок</a>
+                    </div>
+                </div>
+                {% endif %}
+
+                <h2 class="block-header">Контакты<span class="block-header__line"></span></h2>
+                <ul class="contacts-list contacts-list--big">
+                {% for address in company.address_set.all %}
+                    {% if not forloop.first %}
+                        <li class="contacts-list__divider"><span></span></li>
+                    {% endif %}
+
+                    <li class="contacts-list__item"><img class="contacts-list__icon" src="/static/images/contacts-list/address-big.png" /><span>{{ address }}</span></li>
+                    {% if address.phone_set.all %}
+                        <li class="contacts-list__item"><img class="contacts-list__icon" src="/static/images/contacts-list/tel-big.png" /><span>
+                        {% for item in address.phone_set.all %}
+                            {{ item }}<br/> 
+                        {% endfor %}</span></li>
+                    {% endif %}
+                    {% if forloop.first %}
+                        {% if address.company.email %}
+                            <li class="contacts-list__item"><img class="contacts-list__icon" src="/static/images/contacts-list/email-big.png" /><a href="mailto:{{ company.email }}">{{ company.email }}</a></li>
+                        {% endif %}
+                        {% if address.company.website %}
+                            <li class="contacts-list__item"><img class="contacts-list__icon" src="/static/images/contacts-list/url-big.png" /><a href="{{ address.company.website }}">{{ address.company.website }}</a></li>
+                        {% endif %}
+                        {% if address.company.vkontakte %}
+                            <li class="contacts-list__item"><img class="contacts-list__icon" src="/static/images/contacts-list/vk-big.png" /><a href="{{ address.company.vkontakte }}">{{ address.company.vkontakte }}</a></li>
+                        {% endif %}
+                    {% endif %}
+                    {% if address.get_timetable_all %}
+                        <li class="contacts-list__item"><img class="contacts-list__icon" src="/static/images/contacts-list/time-big.png" /><span>
+                        {% for time in address.get_timetable_all %}
+                            {% if time.holiday %}
+                                {{ time.get_day_display }}: Выходной<br/>
+                            {% else %}
+                                {{ time.get_day_display }}: {{ time.worktimebegin|date:"G:i" }} - {{ time.worktimeend|date:"G:i" }}
+                                    {% if time.lunchtimebegin and time.lunchtimeend %}
+                                        ({{ time.lunchtimebegin|date:"G:i" }} - {{ time.lunchtimeend|date:"G:i" }})
+                                    {% endif %}<br/>
+                            {% endif %}
+                        {% endfor %}</span></li>
+                    {% endif %}
+                    {% if address.company.address_count > 1 and forloop.first %}
+                        <li class="contacts-list__item contacts-list__toggle"><span class="bbdb">Показать адреса</span></li>
+                    {% endif %}
+                {% endfor %}
+                </ul>
+
+                <div class="card__buttons" style="margin-top:15px;">
+                <script type="text/javascript">(function() {
+                          if (window.pluso)if (typeof window.pluso.start == "function") return;
+                          if (window.ifpluso==undefined) { window.ifpluso = 1;
+                            var d = document, s = d.createElement('script'), g = 'getElementsByTagName';
+                            s.type = 'text/javascript'; s.charset='UTF-8'; s.async = true;
+                            s.src = ('https:' == window.location.protocol ? 'https' : 'http')  + '://share.pluso.ru/pluso-like.js';
+                            var h=d[g]('body')[0];
+                            h.appendChild(s);
+                          }})();</script>
+                <div class="pluso" data-background="transparent" data-options="medium,square,line,horizontal,counter,theme=04" data-services="vkontakte,odnoklassniki,facebook,twitter,print"></div>
+                </div>
+
+                <script src="//api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
+                <script type="text/javascript">
+                    function init() {
+                        var myMap = new ymaps.Map('map', {
+                                center: [50.835734, 61.668695],
+                                zoom: 9
+                            });
+                        var objects = {% for address in company.clear_address %}{% if forloop.first %}ymaps.geoQuery(ymaps.geocode('{{ address }}')){% else %}.add(ymaps.geocode('{{ address }}')){% endif %}{% endfor %}
+                            .addToMap(myMap)
+                            .applyBoundsToMap(myMap, {checkZoomRange: true});
+                     }
+
+                    ymaps.ready(init);
+                </script>
+                <div class="contacts-map"><div id="map" style="margin-left:10px; width:250px; height: 250px;"></div></div>
+
+                {% if company.companynews_set.all %}
+                    <h2 class="block-header">Новости<span class="block-header__line"></span></h2>
+                    <ul class="small-news">
+                    {% for news in company.companynews_set.all|slice:":5" %}
+                        <li class="small-news__item">
+                            <div class="htp">
+                                <div class="htp__pic">
+                                    <a href="{% url 'current_company_news_detail' news.company.pk news.pk %}">
+                                        {% thumbnail news.photo "70x70" crop="center" as im %}<img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">{% endthumbnail %}</a>
+                                </div>
+                                <div class="htp__text">
+                                    <p class="small-news__date">{{ news.pub_date|date:"G E Y"|lower }}</p>
+                                    <p><a href="{% url 'current_company_news_detail' news.company.pk news.pk %}">{{ news.title }}</a></p>
+                                    <p>{{ news.announcement|truncatewords:10 }}</p>
+                                </div>
+                            </div>
+                        </li>
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+                <dl class="rubrics rubrics--v">
+                    <dt>Фирма участвует в рубриках</dt>
+                    <dd>{% for category in company.category %}
+                        <a href="{% url 'companylist' category.pk %}">{{ category }}</a>
+                        {% if not forloop.last %}<span class="bullet">&bull;</span>{% endif %}
+                    {% endfor %}</dd>
+                </dl>
+                <div class="card__buttons" style="margin-top:15px;">
+                    <div class="button-link button-link--blue">
+                        <a id="dialog-control" href="#">Сообщить об ошибке</a>
+                    </div>
+                    <!--<div class="button-link button-link--green">
+                        <a href="">Отправить эту карточку по смс</a>
+                    </div>-->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% include "footer.html" %}
+
+{% company_form_error company %}
+
+{% company_form_back_call company %}
+</body>
+</html>

@@ -1,0 +1,31 @@
+{% load thumbnail %}
+
+    {% if companynews_list %}
+    <div class="index__company-news">
+        <div class="inner">
+            <div class="inner__content">
+                <div class="main-company-news">
+                    <h2 class="block-header fll">Новости компаний<span class="block-header__line"></span></h2>
+                    <div class="allitems fll">
+                        <div class="arrow"><a href="{% url 'company_news' %}">Все новости</a><div class="arrow__right"></div></div>
+                    </div><br class="clear" />
+                    <ul class="object-list object-list--active-border-orange g-clearfix">
+                    {% for news in companynews_list %}
+                        <li class="object-list__item">
+                            {% if news.photo %}
+                                {% thumbnail news.photo "142x95" crop="center" as im %}
+                                    <p><img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}"></p>
+                                {% endthumbnail %}
+                            {% endif %}
+                            <p class="date">{{ news.pub_date|date:"d E Y"|lower }}</p>
+                            <h3><a href="{% url 'current_company_news_detail' news.company.pk news.pk %}">{{ news.title }}</a></h3>
+                            <p>{{ news.announcement|truncatewords:10 }}</p>
+                            <p><a href="{% url 'company_detail' news.company.pk %} ">{{ news.company }}</a></p>
+                        </li>
+                    {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
