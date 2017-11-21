@@ -1,5 +1,6 @@
 from company.models import CompanyNews, Company
 from django import template
+from django.conf import settings
 
 register = template.Library()
 
@@ -7,6 +8,7 @@ register = template.Library()
 def company_news_list():
     return {
         'companynews_list': CompanyNews.objects.all()[:5],
+        'MAIN_DOMAIN': settings.MAIN_DOMAIN,
     }
 
 @register.inclusion_tag('company/error_form.html')

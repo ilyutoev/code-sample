@@ -18,9 +18,13 @@
                                 {% endthumbnail %}
                             {% endif %}
                             <p class="date">{{ news.pub_date|date:"d E Y"|lower }}</p>
-                            <h3><a href="{% url 'current_company_news_detail' news.company.pk news.pk %}">{{ news.title }}</a></h3>
+                            {% if news.company.vizitka and news.company.subdomain %}
+                                <h3><a href="http://{{ news.company.subdomain }}.{{ MAIN_DOMAIN }}{% url 'sub_current_company_news_detail' news.pk %}">{{ news.title }}</a></h3>
+                            {% else %}
+                                <h3><a href="{% url 'current_company_news_detail' news.company.pk news.pk %}">{{ news.title }}</a></h3>
+                            {% endif %}
                             <p>{{ news.announcement|truncatewords:10 }}</p>
-                            <p><a href="{% url 'company_detail' news.company.pk %} ">{{ news.company }}</a></p>
+                            <p><a href="{{ news.company.get_absolute_url }} ">{{ news.company }}</a></p>
                         </li>
                     {% endfor %}
                     </ul>

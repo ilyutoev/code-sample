@@ -16,7 +16,7 @@
 
     {% if company.img_vizitka %}
     <div class="inner g-clearfix">
-        <img src="{{ company.img_vizitka.url }}" style="margin-top:-17px;" />
+        <img src="http://{{ MAIN_DOMAIN }}{{ company.img_vizitka.url }}" style="margin-top:-17px;" />
     </div>
 
     {% else %}
@@ -25,7 +25,7 @@
             <div class="site-header">
                 {% if company.logo %}
                     <div class="site-header__logo">
-                        <a href="{% url 'company_detail' company.pk %}"><img src="{{ company.logo.url }}" width="108" height="48" /></a>
+                        <a href="http://{{ company.subdomain }}.{{ MAIN_DOMAIN }}"><img src="http://{{ MAIN_DOMAIN }}{{ company.logo.url }}" width="108" height="48" /></a>
                     </div>
                 {% endif %}
                 
@@ -40,19 +40,19 @@
     <div class="site__nav">
         <div class="inner g-clearfix">
             <ul class="site-nav">
-                <li class="site-nav__item"><a href="{% url 'company_detail' company.pk %}">ГЛАВНАЯ</a></li>
+                <li class="site-nav__item"><a href="http://{{ company.subdomain }}.{{ MAIN_DOMAIN }}">ГЛАВНАЯ</a></li>
                 {% if company.companyservice_set.all %}
-                <li class="site-nav__item"><a href="{% url 'current_company_service_all' company.pk  %}">ТОВАРЫ И УСЛУГИ</a></li>
+                <li class="site-nav__item"><a href="http://{{ company.subdomain }}.{{ MAIN_DOMAIN }}{% url 'sub_current_company_service_all' %}">ТОВАРЫ И УСЛУГИ</a></li>
                 {% endif %}
                 {% if company.companyimage_set.all %}
-                <li class="site-nav__item"><a href="{% url 'current_company_photo' company.pk  %}">ФОТОТУР</a></li>
+                <li class="site-nav__item"><a href="http://{{ company.subdomain }}.{{ MAIN_DOMAIN }}{% url 'sub_current_company_photo' %}">ФОТОТУР</a></li>
                 {% endif %}
                 {% if company.companynews_set.all %}
-                <li class="site-nav__item"><a href="{% url 'current_company_news_all' company.pk  %}">НОВОСТИ</a></li>
+                <li class="site-nav__item"><a href="http://{{ company.subdomain }}.{{ MAIN_DOMAIN }}{% url 'sub_current_company_news_all' %}">НОВОСТИ</a></li>
                 {% endif %}
                 {% if company.page_for_vizitka %}
                     {% for page in company.page_for_vizitka %}
-                        <li class="site-nav__item"><a href="{% url 'current_company_page' company.pk page.slug %}">{{ page.title_menu|upper }}</a></li>
+                        <li class="site-nav__item"><a href="http://{{ company.subdomain }}.{{ MAIN_DOMAIN }}{% url 'sub_current_company_page' page.slug %}">{{ page.title_menu|upper }}</a></li>
                     {% endfor %}
                 {% endif %}
             </ul>
@@ -83,7 +83,7 @@
                         <li class="contacts-list__divider"><span></span></li>
                     {% endif %}
 
-                    <li class="contacts-list__item"><img class="contacts-list__icon" src="/static/images/contacts-list/address-big.png" /><span>{{ address }}</span></li>
+                    <li class="contacts-list__item"><img class="contacts-list__icon" src="http://{{ MAIN_DOMAIN }}/static/images/contacts-list/address-big.png" /><span>{{ address }}</span></li>
                     {% if address.phone_set.all %}
                         <li class="contacts-list__item"><img class="contacts-list__icon" src="/static/images/contacts-list/tel-big.png" /><span>
                         {% for item in address.phone_set.all %}
@@ -102,17 +102,32 @@
                         {% endif %}
                     {% endif %}
                     {% if address.get_timetable_all %}
-                        <li class="contacts-list__item"><img class="contacts-list__icon" src="/static/images/contacts-list/time-big.png" /><span>
-                        {% for time in address.get_timetable_all %}
-                            {% if time.holiday %}
-                                {{ time.get_day_display }}: Выходной<br/>
-                            {% else %}
-                                {{ time.get_day_display }}: {{ time.worktimebegin|date:"G:i" }} - {{ time.worktimeend|date:"G:i" }}
-                                    {% if time.lunchtimebegin and time.lunchtimeend %}
-                                        ({{ time.lunchtimebegin|date:"G:i" }} - {{ time.lunchtimeend|date:"G:i" }})
-                                    {% endif %}<br/>
-                            {% endif %}
-                        {% endfor %}</span></li>
+                    <li class="contacts-list__item"><img class="contacts-list__icon" src="/static/images/contacts-list/time-big.png" />
+                                    <table>
+
+                                    {% for time in address.get_timetable_all %}
+                                        <tr>
+                                            {% if time.holiday %}
+                                                <td>{{ time.get_day_display }}:&nbsp;</td><td>Выходной</td>  
+                                            {% else %}
+                                            <td>{{ time.get_day_display }}:&nbsp;</td>
+
+                                                <td>
+                                                    {% if time.get_allday %}
+                                                        {{ time.get_allday }}
+                                                    {% else %}
+                                                        {{ time.worktimebegin|date:"G:i" }} - {{ time.worktimeend|date:"G:i" }}
+                                                        {% if time.lunchtimebegin and time.lunchtimeend %}
+                                                            ({{ time.lunchtimebegin|date:"G:i" }} - {{ time.lunchtimeend|date:"G:i" }})
+                                                        {% endif %}
+
+                                                    {% endif %}                                                    
+                                                </td>
+                                            {% endif %}
+                                        </tr>
+                                    {% endfor %}
+                                </table></li>
+
                     {% endif %}
                     {% if address.company.address_count > 1 and forloop.first %}
                         <li class="contacts-list__item contacts-list__toggle"><span class="bbdb">Показать адреса</span></li>
@@ -156,12 +171,12 @@
                         <li class="small-news__item">
                             <div class="htp">
                                 <div class="htp__pic">
-                                    <a href="{% url 'current_company_news_detail' news.company.pk news.pk %}">
-                                        {% thumbnail news.photo "70x70" crop="center" as im %}<img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">{% endthumbnail %}</a>
+                                    <a href="http://{{ company.subdomain }}.{{ MAIN_DOMAIN }}{% url 'sub_current_company_news_detail' news.pk %}">
+                                        {% thumbnail news.photo "70x70" crop="center" as im %}<img src="http://{{ MAIN_DOMAIN }}{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">{% endthumbnail %}</a>
                                 </div>
                                 <div class="htp__text">
                                     <p class="small-news__date">{{ news.pub_date|date:"G E Y"|lower }}</p>
-                                    <p><a href="{% url 'current_company_news_detail' news.company.pk news.pk %}">{{ news.title }}</a></p>
+                                    <p><a href="http://{{ company.subdomain }}.{{ MAIN_DOMAIN }}{% url 'sub_current_company_news_detail' news.pk %}">{{ news.title }}</a></p>
                                     <p>{{ news.announcement|truncatewords:10 }}</p>
                                 </div>
                             </div>
@@ -172,7 +187,7 @@
                 <dl class="rubrics rubrics--v">
                     <dt>Фирма участвует в рубриках</dt>
                     <dd>{% for category in company.category %}
-                        <a href="{% url 'companylist' category.pk %}">{{ category }}</a>
+                        <a href="http://{{ MAIN_DOMAIN }}{% url 'companylist' category.pk %}">{{ category }}</a>
                         {% if not forloop.last %}<span class="bullet">&bull;</span>{% endif %}
                     {% endfor %}</dd>
                 </dl>

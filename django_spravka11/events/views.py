@@ -1,12 +1,12 @@
-from django.shortcuts import render
-from django.views import generic
 from datetime import datetime, timedelta
-from django.http import Http404
+from django.views import generic
 
 from .models import Events, Session, EventPlace, EventType
 
+
 class IndexView(generic.ListView):
-    """Получаем список событий (по дате, категории), разбиваем на страницы. По списку событий строим список сессий и его выводим в шаблон + ряд перменных."""
+    """Получаем список событий (по дате, категории), разбиваем на страницы.
+    По списку событий строим список сессий и его выводим в шаблон + ряд перменных."""
     template_name = 'events/list.html'
     paginate_by = 10
     
@@ -25,7 +25,6 @@ class IndexView(generic.ListView):
         except:
             pass
 
-        #выбираем только id нужных событий и возвращаем списко полученных id
         if rubr:
             self.ev = Events.objects.filter(session__date=date, event_type=rubr).distinct().values_list('id', flat=True)
         else:
@@ -54,7 +53,6 @@ class IndexView(generic.ListView):
         except:
             pass
 
-        #костыль с разбивкой на страницы
         page = context['page_obj'].number
 
         temp_ev = self.ev[(page-1)*self.paginate_by:page*self.paginate_by]
@@ -72,6 +70,7 @@ class DetailView(generic.DetailView):
         context = super(DetailView, self).get_context_data(**kwargs)
         context['afisha_menu'] = True
         return context
+
 
 class PlaceView(generic.DetailView):
     model = EventPlace

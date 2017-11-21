@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from django.db import models
 
+
 class EventType(models.Model):
     title = models.CharField('Тип мероприятия', max_length=30)
 
@@ -10,6 +11,7 @@ class EventType(models.Model):
     class Meta:
         verbose_name = 'тип мероприятия'
         verbose_name_plural = 'типы мероприятий'
+
 
 class EventPlace(models.Model):
     name = models.CharField('Название места', max_length=200)
@@ -27,6 +29,7 @@ class EventPlace(models.Model):
         week_day = today + timedelta(days=6) 
         return Session.objects.filter(place=self, date__range=(today, week_day)).order_by('date','time')
 
+
 class Events(models.Model):
     title = models.CharField('Название мероприятия', max_length=255)
     description = models.TextField('Описание мероприятия')
@@ -42,7 +45,6 @@ class Events(models.Model):
     class Meta:
         verbose_name = 'событие'
         verbose_name_plural = 'события'
-        #ordering = ['title']
 
     def event_detail(self):
         today = datetime.today()

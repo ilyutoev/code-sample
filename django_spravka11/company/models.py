@@ -1,6 +1,28 @@
+from datetime import datetime, time
+
 from django.db import models
+from django.conf import settings
+from django.core.urlresolvers import reverse
 from mptt.models import MPTTModel, TreeForeignKey
-from datetime import datetime
+
+
+class SeoCategory(MPTTModel):
+    name = models.CharField(max_length=200)
+    priority = models.IntegerField('Приоритет', help_text='Приоритет категории (меньше - лучше)', default=100)
+    parent = TreeForeignKey('self', null=True, blank=True, related_name='children')
+    ico = models.ImageField('Иконка', upload_to = 'company/seocategory', null=True, default=None, blank=True)
+    article = models.TextField('Статья', blank=True, null=True, default=None)
+
+    def __str__(self):
+        return self.name
+        
+    class MPTTMeta:
+        order_insertion_by = ['priority']
+
+    class Meta:
+        verbose_name = 'seo рубрику'
+        verbose_name_plural = 'seo рубрики'
+
 
 class Category(MPTTModel):
     name = models.CharField(max_length=200)
@@ -18,6 +40,7 @@ class Category(MPTTModel):
         verbose_name = 'рубрику'
         verbose_name_plural = 'рубрики'
 
+
 class Company(models.Model):
     name = models.CharField('Название компании', max_length=255)
     website = models.URLField('Адрес сайта', blank=True)
@@ -28,14 +51,33 @@ class Company(models.Model):
     banner = models.ImageField('Рекламный модуль', upload_to = 'uploads/module', null=True, default=None, blank=True)
     keywords = models.CharField('Ключевые слова', blank=True, max_length=255)
     article = models.TextField('Статья о компании', blank=True)
-    priority = models.IntegerField('Приоритет', help_text='Приоритет компании в зависимости от купленной рекламы (больше - лучше)', default=1)
-    recomendation = models.BooleanField('Рекомендуем', help_text='Вывод на главную страницу в блок "Рекомендуем", бирка "Рекомендуем"', default=False)
+    priority = models.IntegerField('Приоритет',
+                                   help_text='Приоритет компании в зависимости от купленной рекламы (больше - лучше)',
+                                   default=1)
+    recomendation = models.BooleanField('Рекомендуем',
+                                        help_text='Вывод на главную страницу в блок "Рекомендуем", бирка "Рекомендуем"',
+                                        default=False)
     recomendationtext = models.CharField('Текст рекомендации для главной', blank=True, max_length=255)
-    vizitka = models.BooleanField('Сайт визитка', default=False)
-    img_vizitka = models.ImageField('Изображение для шапки сайта визитки', upload_to = 'uploads/vizitka', null=True, default=None, blank=True, help_text='Ширина картинки 1170 px, высоту регулируйте сами - оптимально от 100-200 px')
-    yellow = models.BooleanField('На первое место', help_text='Выделяем желтым и добавляем выоский приоритет', default=False)
+    yellow = models.BooleanField('На первое место',
+                                 help_text='Выделяем желтым и добавляем выоский приоритет',
+                                 default=False)
     blue = models.BooleanField('На второе место', help_text='Выделяем синим и ставим на второе метос', default=False)
     counter = models.IntegerField('Счетчик посещений', default=1)
+    vizitka = models.BooleanField('Сайт визитка', default=False)
+    subdomain = models.SlugField('Поддомен сайта визитки',
+                                 max_length=50,
+                                 null=True,
+                                 blank=True,
+                                 unique=True,
+                                 help_text='Поддомен для сайта визитки. Только на английском и без пробелов.'
+                                           'Возможен символ дефиса.')
+    img_vizitka = models.ImageField('Изображение для шапки сайта визитки',
+                                    upload_to='uploads/vizitka',
+                                    null=True,
+                                    default=None,
+                                    blank=True,
+                                    help_text='Ширина картинки 1170 px, высоту регулируйте сами - оптимально от'
+                                              '100-200 px')
     
     def __str__(self):
         return self.name
@@ -43,6 +85,18 @@ class Company(models.Model):
     class Meta:
         verbose_name = 'компанию'
         verbose_name_plural = 'компании'
+
+    def save(self, *args, **kwargs):
+        if not self.subdomain:
+            self.subdomain = None
+
+        super().save(*args, **kwargs)
+
+    def get_absolute_url(self):
+        if self.vizitka and self.subdomain:
+            return 'http://{0}.{1}'.format(self.subdomain, settings.MAIN_DOMAIN)
+        else:
+            return reverse('company_detail', args=[self.pk])
 
     def category(self):
         temp = Address.objects.filter(company=self)
@@ -52,10 +106,15 @@ class Company(models.Model):
     def address_count(self):
         return Address.objects.filter(company=self.pk).count()
 
-    def common_company(self):
-        temp = Address.objects.filter(company=self)
+    def common_company(self, city=False):
+        if not city:
+            city = Address.objects.filter(company=self)[0].city.name
+        temp = Address.objects.filter(company=self, city__name=city)
         temp = Category.objects.filter(address__in=temp).distinct().values_list('id', flat=True)
-        return Company.objects.filter(address__category__in=temp).exclude(pk=int(self.pk)).distinct()[:3]
+        return Company.objects.filter(address__category__in=temp,
+                                      address__city__name=city).exclude(pk=int(self.pk)).order_by('-yellow',
+                                                                                                  '-blue',
+                                                                                                  '-priority').distinct()[:3]
 
     def page_for_vizitka(self):
         return CompanyPage.objects.filter(company=self, ismemu=True).order_by('-priority')
@@ -72,7 +131,8 @@ class Company(models.Model):
 
     @staticmethod
     def autocomplete_search_fields():
-        return ('id__iexact', 'name__icontains',)
+        return 'id__iexact', 'name__icontains'
+
 
 class City(models.Model):
     name = models.CharField('Город', max_length=50)
@@ -85,20 +145,20 @@ class City(models.Model):
         verbose_name = 'город'
         verbose_name_plural = 'города'
 
+
 class Address(models.Model):
     company = models.ForeignKey(Company, verbose_name="компания")
-    #список городов как табличка + приоритет для вывода
     city = models.ForeignKey(City, verbose_name="город")
     address = models.CharField('Адрес', max_length=255)
     category = models.ManyToManyField(Category, verbose_name="рубрики")
+    seo_category = models.ManyToManyField(SeoCategory, verbose_name="seo рубрики")
 
-    #для создания поискового индекса - все связанные рубрики в строку и в индекс
     def get_category(self):
         string = ''
         try:
             for cat in self.category.all():
-                string += ' ' + str(cat.name) + ' ' + str(cat.parent.name) + ' ' + str(cat.parent.parent.name)
-        except:
+                string += ' ' + str(cat.name)
+        except Exception:
             pass
         return string
 
@@ -118,6 +178,7 @@ class Address(models.Model):
         verbose_name = 'Адрес компании'
         verbose_name_plural = 'Адреса компании'
 
+
 class Phone(models.Model):
     number = models.CharField('Номер телефона', max_length=200)
     address = models.ForeignKey(Address)
@@ -128,6 +189,7 @@ class Phone(models.Model):
     class Meta:
         verbose_name = 'номер телефона компании'
         verbose_name_plural = 'номера телефонов компаний'
+
 
 class Timetable(models.Model):
     DAY_TYPE = (
@@ -147,12 +209,25 @@ class Timetable(models.Model):
     lunchtimeend = models.TimeField('Конец обеда', blank=True, null=True, default='00:00:00')
     address = models.ForeignKey(Address)
 
+    def get_allday(self):
+        begin = time(hour=0, minute=0)
+        end = time(hour=23, minute=59)
+        zero_time = time(hour=0, minute=0)
+
+        if self.worktimebegin == begin and self.worktimeend == end:
+            return 'Круглосуточно'
+        elif self.worktimebegin == zero_time and self.worktimeend == zero_time:
+            return 'По расписанию'
+        else:
+            return False
+
     class Meta:
         verbose_name = 'Время работы'
         verbose_name_plural = 'Время работы'
 
     def __str__(self):
         return self.address.address + ' - ' + self.get_day_display()
+
 
 class CompanyImage(models.Model):
     image = models.ImageField('Изображение', upload_to = 'company/images/%Y/%m/%d', null=True, default=None)
@@ -164,6 +239,7 @@ class CompanyImage(models.Model):
     class Meta:
         verbose_name = 'изображение'
         verbose_name_plural = 'изображения'
+
 
 class CompanyPage(models.Model):
     company = models.ForeignKey(Company, verbose_name="компания")
@@ -181,6 +257,7 @@ class CompanyPage(models.Model):
         verbose_name = 'Страница сайта визитки'
         verbose_name_plural = 'Страницы сайта визитки'
 
+
 class CompanyService(models.Model):
     title = models.CharField('Название товара/услуги', max_length=200)
     text = models.TextField('Описание')
@@ -193,6 +270,7 @@ class CompanyService(models.Model):
     class Meta:
         verbose_name = 'товар/услуга'
         verbose_name_plural = 'товары/услуги'
+
 
 class CompanyNews(models.Model):
     company = models.ForeignKey(Company, verbose_name="компания")

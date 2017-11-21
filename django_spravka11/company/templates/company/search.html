@@ -13,85 +13,96 @@
 
 <h1 class="block-header">Поиск по каталогу компаний<span class="block-header__line"></span></h1>
 
-{% if search_results %}
+{% if object_list %}
     <div class="search-result">
-        <h2 class="search-result__header">Вы искали &ldquo;{{ q }}{% if q_punto %} ({{ q_punto }}){% endif %}{% if q_spell %} {{ q_spell }}{% endif %}&rdquo;, в городе &ldquo;{{ city }}&rdquo;</h2>
+        <h2 class="search-result__header">Вы искали &ldquo;{{ q }}{% if q_punto %} ({{ q_punto }}){% endif %}{% if q_spell %} {{ q_spell }}{% endif %}&rdquo;, &ldquo;{{ city }}&rdquo;</h2>
         <p class="search-result__count">Всего найдено: {{ search_results_count }}</p>
 
-    {% for company in search_results %}
-        <div class="search-block {% if company.recomendation %}search-block--recommend{% endif %} {% if company.yellow %}search-block--vip {% else %}{% if company.blue %}search-block--vip2 {%else%} {% if company.priority > 10 %}search-block--standart{% endif %} {% endif %} {% endif %} g-clearfix">
-            {% if company.recomendation %}<p class="search-block__label recommend-label">Рекомендуем</p>{% endif %}
-            <div class="search-block__content">
-                <div class="htp">
-                    <div class="htp__pic">
-                        {% if company.logo %}<a href="{% url 'company_detail' company.pk %}"><img src="{{ company.logo.url }}" width="170" height="80"></a>{% else %}<a class="logo-dialog-control" href="#"><img src="/static/images/card/1.png" width="170" height="80"></a>{% endif %}
-                        {% if company.priority < 10 %}<p><a class="ads-dialog-control" href="#">В лидеры рубрики</a></p>{% endif %}
+        <div class="search-result">
+            {% for address in object_list %}
+                <div class="search-block {% if address.company.recomendation %}search-block--recommend{% endif %} {% if address.company.yellow %}search-block--vip {% else %}
+                {% if address.company.blue %}search-block--vip2 {%else%} {% if address.company.priority > 10 %}search-block--standart{% endif %} {% endif %} {% endif %} g-clearfix">
+                {% if address.company.recomendation %}<p class="search-block__label recommend-label">Рекомендуем</p>{% endif %}
+
+                    <div class="search-block__content">
+                        <div class="htp">
+                            <div class="htp__pic">
+                                {% if address.company.logo %}<a href ="{{ address.company.get_absolute_url }}"><img src="{{ address.company.logo.url }}" width="170" height="80"></a>{% else %}<a class="logo-dialog-control" href="#"><img src="/static/images/card/1.png" width="170" height="80"></a>{% endif %}
+                                {% if address.company.priority < 10 %}<p><a class="ads-dialog-control" href="#">В лидеры рубрики</a></p>{% endif %}
+                            </div>
+                            <div class="htp__text">
+                                <h3><a href="{{ address.company.get_absolute_url }}">{{ address.company.name }}</a></h3>
+                                <p>{{ address.company.keywords }}</p>
+                                {% if not address.company.companyimage_set.all or address.company.priority < 10 %}<div class="add-new-photo"><a class="ads-dialog-control" href="#">Добавить фотографии<br />товаров и услуг</a></div>{% endif %}
+                            </div>
+                        </div>
+                        
+                        {% if address.company.companyimage_set.all and address.company.priority > 10 %}
+                            <div class="thumb slider-wrap">
+                                <div class="slider-wrap__prev">
+                                    <a href="#" class="slider-control slider-control--prev"><span class="prev"></span></a>
+                                </div>
+                                <div class="slider-wrap__next">
+                                    <a href="#" class="slider-control slider-control--next"><span class="next"></span></a>
+                                </div>
+                                <ul class="thumb-list">
+                                    {% for img in address.company.companyimage_set.all %}
+                                        {% thumbnail img.image "100x100" crop="center" as im %}
+                                            <li class="thumb-list__item"><a href="{{ img.image.url }}"><img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}"></a></li>
+                                        {% endthumbnail %}
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
                     </div>
 
-                    <div class="htp__text">
-                        <h3><a href="{% url 'company_detail' company.pk %}">{{ company.name }}</a></h3>
-                        <p>{{ company.keywords }}</p>
-                        {% if not company.companyimage_set.all or company.priority < 10 %}<div class="add-new-photo"><a class="ads-dialog-control" href="#">Добавить фотографии<br />товаров и услуг</a></div>{% endif %}
-                    </div>
-                </div>
-                    
-                {% if company.companyimage_set.all and company.priority > 10 %}
-                    <div class="thumb slider-wrap">
-                        <div class="slider-wrap__prev">
-                            <a href="#" class="slider-control slider-control--prev"><span class="prev"></span></a>
-                        </div>
-                        <div class="slider-wrap__next">
-                            <a href="#" class="slider-control slider-control--next"><span class="next"></span></a>
-                        </div>
-                        <ul class="thumb-list">
-                            {% for img in company.companyimage_set.all %}
-                                {% thumbnail img.image "100x100" crop="center" as im %}
-                                    <li class="thumb-list__item"><a href="{{ img.image.url }}"><img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}"></a></li>
-                                {% endthumbnail %}
-                            {% endfor %}
+                    <div class="search-block__contacts">
+                        <ul class="contacts-list contacts-list--small">
+                            <li class="contacts-list__item"><img class="contacts-list__icon" src="/static/images/contacts-list/address-small.png" /><span>{{ address.address }}</span></li>
+                            {% if address.phone_set.all %}
+                                <li class="contacts-list__item"><img class="contacts-list__icon" src="/static/images/contacts-list/tel-small.png" /><span>
+                                {% for item in address.phone_set.all %}
+                                    {{ item }}<br/> 
+                                {% endfor %}</span></li>
+                            {% endif %}
+                            {% if address.company.email %}
+                                <li class="contacts-list__item"><img class="contacts-list__icon" src="/static/images/contacts-list/email-small.png" /><a href="mailto:{{ address.company.email }}">{{ address.company.email }}</a></li>
+                            {% endif %}
+                            {% if address.company.website %}
+                                <li class="contacts-list__item"><img class="contacts-list__icon" src="/static/images/contacts-list/url-small.png" /><a href="{{ address.company.website }}">{{ address.company.website }}</a></li>
+                            {% endif %}
+                            {% if address.get_timetable_today %}
+                                <li class="contacts-list__item"><img class="contacts-list__icon" src="/static/images/contacts-list/time-small.png" /><span>
+
+
+                                {% if address.get_timetable_today.0.holiday %}
+                                    {{ address.get_timetable_today.0.get_day_display }}: Выходной
+                                {% else %}
+                                    {{ address.get_timetable_today.0.get_day_display }}: 
+                                    
+                                    {% if address.get_timetable_today.0.get_allday %}
+                                            {{ address.get_timetable_today.0.get_allday }}
+                                    {% else %}
+                                        {{ address.get_timetable_today.0.worktimebegin|date:"G:i" }} - {{ address.get_timetable_today.0.worktimeend|date:"G:i" }}
+                                        {% if address.get_timetable_today.0.lunchtimebegin and address.get_timetable_today.0.lunchtimeend %}
+                                                , ({{ address.get_timetable_today.0.lunchtimebegin|date:"G:i" }} - {{ address.get_timetable_today.0.lunchtimeend|date:"G:i" }})
+                                        {% endif %}
+
+                                    {% endif %}
+                                    
+                                {% endif %}</span></li>
+
+
+                            {% endif %}
+                            {% if address.company.address_count > 1 %}
+                                <li class="contacts-list__item"><a href="{{ address.company.get_absolute_url }}">Еще адреса {{ address.company.address_count }}</a></li>    
+                            {% endif %}
                         </ul>
-                    </div>
-                {% endif %}
-
-            </div>
-
-            <div class="search-block__contacts">
-                <ul class="contacts-list contacts-list--small">
-                    <li class="contacts-list__item"><img class="contacts-list__icon" src="/static/images/contacts-list/address-small.png" /><span>{{ company.address_set.all.0 }}</span></li>
-                    {% if company.address_set.all.0.phone_set.all %}
-                        <li class="contacts-list__item"><img class="contacts-list__icon" src="/static/images/contacts-list/tel-small.png" /><span>
-                        {% for item in company.address_set.all.0.phone_set.all %}
-                            {{ item }}<br/> 
-                        {% endfor %}</span></li>
-                    {% endif %}
-                    {% if company.email %}
-                        <li class="contacts-list__item"><img class="contacts-list__icon" src="/static/images/contacts-list/email-small.png" /><a href="mailto:{{ company.email }}">{{ company.email }}</a></li>
-                    {% endif %}
-                    {% if company.website %}
-                        <li class="contacts-list__item"><img class="contacts-list__icon" src="/static/images/contacts-list/url-small.png" /><a href="{{ company.website }}">{{ company.website }}</a></li>
-                    {% endif %}
-
-                    {% if company.address_set.all.0.get_timetable_today %}
-                        <li class="contacts-list__item"><img class="contacts-list__icon" src="/static/images/contacts-list/time-small.png" /><span>
-                        {% if company.address_set.all.0.get_timetable_today.0.holiday %}
-                            {{ company.address_set.all.0.get_timetable_today.0.get_day_display }}: Выходной
-                        {% else %}
-                            {{ company.address_set.all.0.get_timetable_today.0.get_day_display }}: {{ company.address_set.all.0.get_timetable_today.0.worktimebegin|date:"G:i" }} - {{ company.address_set.all.0.get_timetable_today.0.worktimeend|date:"G:i" }}
-                                {% if company.address_set.all.0.get_timetable_today.0.lunchtimebegin and company.address_set.all.0.get_timetable_today.0.lunchtimeend %}
-                                    , обед: {{ company.address_set.all.0.get_timetable_today.0.lunchtimebegin|date:"G:i" }} - {{ company.address_set.all.0.get_timetable_today.0.lunchtimeend|date:"G:i" }}
-                                {% endif %}
-                        {% endif %}</span></li>
-                    {% endif %}
-
-                    {% if company.address_count > 1 %}
-                        <li class="contacts-list__item"><a href="{% url 'company_detail' company.pk %}">Еще адреса {{ company.address_count }}</a></li>    
-                    {% endif %}
-                    </ul>
-                </div>                    
-            
-            </div>
-   
-    {% endfor %}
+                    </div>                    
+                
+                </div>
+            {% endfor %}
+        </div>
     </div> 
 
 {% else %}

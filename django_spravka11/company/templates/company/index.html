@@ -16,12 +16,12 @@
     <div class="page__content">
         <div class="inner">
             <div class="inner__content">
-                <h2 class="block-header">Справочник организаций<br />Республики Коми<span class="block-header__line"></span></h2>
+                <h1 class="block-header">Справочник организаций<br />Республики Коми<span class="block-header__line"></span></h1>
                 <!--Каталог-->
                 <div class="catalog">
-                    <div class="catalog__column fll" style="margin:0 50px 0 0">
+                    <div class="catalog__column fll" style="margin:0 30px 0 0">
                         <ul class="catalog-list">
-                    {% recursetree category1 %}
+                    {% recursetree seo_category1 %}
                         {% if node.level == 0 %}
                             <li class="catalog-list__item">
                                 <div class="catalog-entry">
@@ -30,11 +30,7 @@
                         {% endif %}
 
                         {% if node.level == 1 %}
-                            <li class="useful-list__item"><p class="catalog-entry__h"><span class="bbdb">{{ node.name }}</span></p>
-                        {% endif %}
-
-                        {% if node.level == 2 %}
-                            <a href="{% url 'companylist' node.pk %}">{{ node.name }}</a>
+                            <a href="{% url 'top_companylist' node.pk %}">{{ node.name }}</a>
                             {% if node.get_next_sibling %}
                                 <span class="bullet">&bull;</span>
                             {% endif %}
@@ -63,7 +59,7 @@
                     <div class="catalog__column fll">
                         <ul class="catalog-list">
                            
-                    {% recursetree category2 %}
+                    {% recursetree seo_category2 %}
                         {% if node.level == 0 %}
                             <li class="catalog-list__item">
                                 <div class="catalog-entry">
@@ -72,11 +68,7 @@
                         {% endif %}
 
                         {% if node.level == 1 %}
-                            <li class="useful-list__item"><p class="catalog-entry__h"><span class="bbdb">{{ node.name }}</span></p>
-                        {% endif %}
-
-                        {% if node.level == 2 %}
-                            <a href="{% url 'companylist' node.pk %}">{{ node.name }}</a>
+                            <a href="{% url 'top_companylist' node.pk %}">{{ node.name }}</a>
                             {% if node.get_next_sibling %}
                                 <span class="bullet">&bull;</span>
                             {% endif %}
@@ -101,22 +93,9 @@
                     {% endrecursetree %}
 
                         </ul>
+                        <br>
+                        <h2><a href="{% url 'category_index' %}">Посмотреть полный рубрикатор >></a></h2>
                     </div>
-                </div>
-                <!--Алфавит-->
-                <div class="alphabet">
-                    <h4 class="alphabet__header">Алфавитный поиск товаров и услуг</h4>
-                    <ul class="alphabet-letters">
-
-                        {% for key,value in abc.items %}
-                            {% if key == 30 %}
-                                <li class="alphabet-letters__letter alphabet-letters__letter--all"><a href="{% url 'categoryabclist' key %}">{{ value }}</a></li>
-                            {% else %}
-                                <li class="alphabet-letters__letter"><a href="{% url 'categoryabclist' key %}">{{ value }}</a></li>
-                            {% endif %}
-                        {% endfor %}
-
-                    </ul>
                 </div>
             </div>
         </div>
@@ -158,9 +137,9 @@
                                 <li class="slider-list__item">
                                     {% for company in company_group %}
                                         <div class="htp">
-                                            <div class="htp__pic"><a href="{% url 'company_detail' company.pk %}"><img src="/media/{{ company.logo }}" width="108" height="48" alt="" /></a></div>
+                                            <div class="htp__pic"><a href="{{ company.get_absolute_url }}"><img src="/media/{{ company.logo }}" width="108" height="48" alt="" /></a></div>
                                         <div class="htp__text">
-                                            <p><a href="{% url 'company_detail' company.pk %}">{{ company.name }}</a></p>
+                                            <p><a href="{{ company.get_absolute_url }}">{{ company.name }}</a></p>
                                         </div>
                                         <div class="htp__text2"><p>{{ company.recomendationtext }}</p></div>
                                         </div>

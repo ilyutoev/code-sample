@@ -3,43 +3,43 @@
     <div class="page__nav">
         <div class="inner g-clearfix">
             <ul class="main-nav g-clearfix">
-                <li class="main-nav__item"><a class="main-nav__link" href="{% url 'index' %}">Главная</a></li>
+                <li class="main-nav__item"><a class="main-nav__link" href="http://{{ MAIN_DOMAIN }}">Главная</a></li>
                 <li class="main-nav__item main-nav__item--dropdown"><a class="main-nav__link" href="">Наши проекты</a>
                     <ul class="main-nav-l2">
-                        <li class="main-nav-l2__item"><a href="/page/spravka/" class="main-nav-l2__link">Spravka11.ru</a></li>
-                        <li class="main-nav-l2__item"><a href="/page/spravka-doc/" class="main-nav-l2__link">Справочник «11 Регион»</a></li>
-                        <li class="main-nav-l2__item"><a href="/page/wedding/" class="main-nav-l2__link">Свадебные скидки</a></li>
-                        <li class="main-nav-l2__item"><a href="/page/children/" class="main-nav-l2__link">Детские скидки</a></li>
-                        <li class="main-nav-l2__item"><a href="/page/sms/" class="main-nav-l2__link">Смс-рассылка</a></li>
+                        <li class="main-nav-l2__item"><a href="http://{{ MAIN_DOMAIN }}/page/spravka/" class="main-nav-l2__link">Spravka11.ru</a></li>
+                        <li class="main-nav-l2__item"><a href="http://{{ MAIN_DOMAIN }}/page/spravka-doc/" class="main-nav-l2__link">Справочник «11 Регион»</a></li>
+                        <li class="main-nav-l2__item"><a href="http://{{ MAIN_DOMAIN }}/page/wedding/" class="main-nav-l2__link">Свадебные скидки</a></li>
+                        <li class="main-nav-l2__item"><a href="http://{{ MAIN_DOMAIN }}/page/children/" class="main-nav-l2__link">Детские скидки</a></li>
+                        <li class="main-nav-l2__item"><a href="http://{{ MAIN_DOMAIN }}/page/sms/" class="main-nav-l2__link">Смс-рассылка</a></li>
                     </ul>
                 </li>
                 <li class="main-nav__item main-nav__item--dropdown"><a class="main-nav__link" href="">Типография</a>
                     <ul class="main-nav-l2">
-                        <li class="main-nav-l2__item"><a href="/company/75472/service/" class="main-nav-l2__link">Прайс полиграфия</a></li>
-                        <li class="main-nav-l2__item"><a href="/page/tech/" class="main-nav-l2__link">Технические требования</a></li>
-                        <li class="main-nav-l2__item"><a href="/page/count/" class="main-nav-l2__link">Рассчитать заказ</a></li>
-                        <li class="main-nav-l2__item"><a href="/page/price-diz/" class="main-nav-l2__link">Прайс дизайн</a></li>
+                        <li class="main-nav-l2__item"><a href="http://{{ MAIN_DOMAIN }}/company/75472/service/" class="main-nav-l2__link">Прайс полиграфия</a></li>
+                        <li class="main-nav-l2__item"><a href="http://{{ MAIN_DOMAIN }}/page/tech/" class="main-nav-l2__link">Технические требования</a></li>
+                        <li class="main-nav-l2__item"><a href="http://{{ MAIN_DOMAIN }}/page/count/" class="main-nav-l2__link">Рассчитать заказ</a></li>
+                        <li class="main-nav-l2__item"><a href="http://{{ MAIN_DOMAIN }}/page/price-diz/" class="main-nav-l2__link">Прайс дизайн</a></li>
                     </ul>
                 </li>
                 <li class="main-nav__item main-nav__item--dropdown"><a class="main-nav__link" href="">О компании</a>
                     <ul class="main-nav-l2">
-                        <li class="main-nav-l2__item"><a href="/page/press/" class="main-nav-l2__link">Пресс-релиз</a></li>
-                        <li class="main-nav-l2__item"><a href="/page/achieve/" class="main-nav-l2__link">Достижения</a></li>
-                        <li class="main-nav-l2__item"><a href="/page/objectives/" class="main-nav-l2__link">Цели</a></li>
-                        <li class="main-nav-l2__item"><a href="/page/contact/" class="main-nav-l2__link">Контакты</a></li>
+                        <li class="main-nav-l2__item"><a href="http://{{ MAIN_DOMAIN }}/page/press/" class="main-nav-l2__link">Пресс-релиз</a></li>
+                        <li class="main-nav-l2__item"><a href="http://{{ MAIN_DOMAIN }}/page/achieve/" class="main-nav-l2__link">Достижения</a></li>
+                        <li class="main-nav-l2__item"><a href="http://{{ MAIN_DOMAIN }}/page/objectives/" class="main-nav-l2__link">Цели</a></li>
+                        <li class="main-nav-l2__item"><a href="http://{{ MAIN_DOMAIN }}/page/contact/" class="main-nav-l2__link">Контакты</a></li>
                     </ul>
                 </li>
             </ul>
             <ul class="main-category-nav g-clearfix">
              <li class="main-category-nav__item {% if news_menu %}main-category-nav__item--active{% endif %}">
                 <span class="main-category-nav__icon main-category-nav__icon--news"></span>
-                <a class="main-category-nav__link" href="{% url 'news_list' %}">Новости</a>
+                <a class="main-category-nav__link" href="http://{{ MAIN_DOMAIN }}{% url 'news_list' %}">Новости</a>
              </li>
              
 
              <li class="main-category-nav__item {% if afisha_menu %}main-category-nav__item--active{% endif %}">
                 <span class="main-category-nav__icon main-category-nav__icon--afisha"></span>
-                <a class="main-category-nav__link" href="{% url 'events_list' %}">Афиша</a>
+                <a class="main-category-nav__link" href="http://{{ MAIN_DOMAIN }}{% url 'events_list' %}">Афиша</a>
                 </li>
             </ul>
             {% head_static %}

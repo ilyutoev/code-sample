@@ -9,7 +9,4 @@ urlpatterns = patterns('',
     url(r'^rubr/(?P<rubr_pk>\d+)/$', views.IndexView.as_view(), name='eventtype_list'),
     url(r'^rubr/(?P<rubr_pk>\d+)/day/(?P<day>\d+)/$', views.IndexView.as_view(), name='eventtype_day_list'),
     url(r'^day/(?P<day>\d+)/$', views.IndexView.as_view(), name='days_list'),
-
-#2 варианта - все по дате 
-# - в рубрике по дате 
     )

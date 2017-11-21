@@ -2,6 +2,7 @@ import datetime
 from haystack import indexes
 from company.models import Address
 
+
 class AddressIndex(indexes.SearchIndex, indexes.Indexable):
     text = indexes.CharField(document=True, use_template=True)
     city = indexes.CharField(model_attr='city__name')

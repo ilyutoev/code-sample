@@ -11,19 +11,19 @@
 {% block main_content %}
 <p class="breadcrumbs"><a href="{% url 'index' %}" class="breadcrumbs__link">Главная</a> / <a href="{% url 'companylist' company.category.0.parent.parent.pk %}" class="breadcrumbs__link">{{ company.category.0.parent.parent }}</a> / <a href="{% url 'companylist' company.category.0.parent.pk %}" class="breadcrumbs__link">{{ company.category.0.parent }}</a> / <a href="{% url 'companylist' company.category.0.pk %}" class="breadcrumbs__link">{{ company.category.0.name }}</a></p>
 
-                <div class="card">
+                <div class="card" itemscope itemtype="http://schema.org/Organization">
                     <div class="card__content">
-                        <h1 class="block-header">{{ company.name }}</h2>
+                        <h1 class="block-header" itemprop="name">{{ company.name }}</h1>
                         <div class="tp card__tp">
                         {% if company.logo %}
-                            <div class="htp__pic"><img src="{{ company.logo.url }}" width="170" height="80" alt="Логотип {{ company.name }}" /></div>
+                            <div class="htp__pic" itemprop="logo"><img src="{{ company.logo.url }}" width="170" height="80" alt="Логотип {{ company.name }}" /></div>
                         {% else %}
                             <div class="htp__pic"><a class="logo-dialog-control" href="#"><img src="/static/images/card/1.png" width="170" height="80"></a></div>
                         {% endif %}
                             <div class="htp__text">
                                 {% if company.recomendation %}<p class="recommend-label">Рекомендуем</p>{% endif %}
                                 <p>Информация актуальна на {{ company.dateupdate }}</p>
-                                {% comment %}<p>Кол-во просмотров {{ company.counter }}</p>{% endcomment %}
+                                <p>Кол-во просмотров: {{ company.counter }}</p>
                             </div>
                         </div>
 
@@ -63,13 +63,13 @@
                         <h2 class="block-header">Рекомендуемые компании в данной рубрике<span class="block-header__line"></span></h2>
                         <div class="card__recommend">
                         <ul class="h-list h-list--flat g-clearfix">
-                            {% for company in company.common_company %}
+                            {% for company in common_company %}
                             <li class="h-list__item">
                                 <div class="vtp">
                                     {% if company.logo %}
-                                        <div class="vtp__pic"><a href="{% url 'company_detail' company.pk %}"><img src="{{ company.logo.url }}" width="170" height="80" /></a><br /></div>
+                                        <div class="vtp__pic"><a href="{{ company.get_absolute_url }}"><img src="{{ company.logo.url }}" width="170" height="80" /></a><br /></div>
                                     {% endif %}
-                                    <div class="vtp__text"><a class="h-list__text" href="{% url 'company_detail' company.pk %}">{{ company.name }}</a></div>
+                                    <div class="vtp__text"><a class="h-list__text" href="{{ company.get_absolute_url }}">{{ company.name }}</a></div>
                                 </div>
                             </li>
                             {% endfor %}
@@ -82,22 +82,24 @@
 
                     </div>
                     <div class="card__sidebar">
+                    
+
                         <ul class="contacts-list contacts-list--big">
-                        {% for address in company.address_set.all %}
+                        {% for address in city_address %}
                             {% if not forloop.first %}
                             <li class="contacts-list__divider"><span></span></li>
                             {% endif %}
 
-                            <li class="contacts-list__item"><img class="contacts-list__icon" src="/static/images/contacts-list/address-big.png" /><span>{{ address }}</span></li>
+                            <li class="contacts-list__item" ><img class="contacts-list__icon" src="/static/images/contacts-list/address-big.png" /><span itemprop="address">{{ address }}</span></li>
                             {% if address.phone_set.all %}
-                                <li class="contacts-list__item"><img class="contacts-list__icon" src="/static/images/contacts-list/tel-big.png" /><span>
+                                <li class="contacts-list__item"><img class="contacts-list__icon" src="/static/images/contacts-list/tel-big.png" /><span itemprop="telephone">
                                 {% for item in address.phone_set.all %}
                                     {{ item }}<br/> 
                                 {% endfor %}</span></li>
                             {% endif %}
                             {% if forloop.first %}
                                 {% if address.company.email %}
-                                    <li class="contacts-list__item"><img class="contacts-list__icon" src="/static/images/contacts-list/email-big.png" /><a href="mailto:{{ company.email }}">{{ company.email }}</a></li>
+                                    <li class="contacts-list__item"><img class="contacts-list__icon" src="/static/images/contacts-list/email-big.png" /><a href="mailto:{{ company.email }}" itemprop="email">{{ company.email }}</a></li>
                                 {% endif %}
                                 {% if address.company.website %}
                                     <li class="contacts-list__item"><img class="contacts-list__icon" src="/static/images/contacts-list/url-big.png" /><a href="{{ address.company.website }}">{{ address.company.website }}</a></li>
@@ -107,17 +109,31 @@
                                 {% endif %}
                             {% endif %}
                             {% if address.get_timetable_all %}
-                                <li class="contacts-list__item"><img class="contacts-list__icon" src="/static/images/contacts-list/time-big.png" /><span>
-                                {% for time in address.get_timetable_all %}
-                                    {% if time.holiday %}
-                                        {{ time.get_day_display }}: Выходной<br/>
-                                    {% else %}
-                                        {{ time.get_day_display }}: {{ time.worktimebegin|date:"G:i" }} - {{ time.worktimeend|date:"G:i" }}
-                                            {% if time.lunchtimebegin and time.lunchtimeend %}
-                                                ({{ time.lunchtimebegin|date:"G:i" }} - {{ time.lunchtimeend|date:"G:i" }})
-                                            {% endif %}<br/>
-                                    {% endif %}
-                                {% endfor %}</span></li>
+                                <li class="contacts-list__item"><img class="contacts-list__icon" src="/static/images/contacts-list/time-big.png" />
+                                    <table>
+
+                                    {% for time in address.get_timetable_all %}
+                                        <tr>
+                                            {% if time.holiday %}
+                                                <td>{{ time.get_day_display }}:&nbsp;</td><td>Выходной</td>  
+                                            {% else %}
+                                            <td>{{ time.get_day_display }}:&nbsp;</td>
+
+                                                <td>
+                                                    {% if time.get_allday %}
+                                                        {{ time.get_allday }}
+                                                    {% else %}
+                                                        {{ time.worktimebegin|date:"G:i" }} - {{ time.worktimeend|date:"G:i" }}
+                                                        {% if time.lunchtimebegin and time.lunchtimeend %}
+                                                            ({{ time.lunchtimebegin|date:"G:i" }} - {{ time.lunchtimeend|date:"G:i" }})
+                                                        {% endif %}
+
+                                                    {% endif %}                                                    
+                                                </td>
+                                            {% endif %}
+                                        </tr>
+                                    {% endfor %}
+                                </table></li>
                             {% endif %}
                             {% if address.company.address_count > 1 and forloop.first %}
                                 <li class="contacts-list__item contacts-list__toggle"><span class="bbdb">Показать адреса</span></li>

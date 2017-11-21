@@ -12,6 +12,7 @@ class IndexView(generic.ListView):
         context['news_menu'] = True
         return context
 
+
 class DetailView(generic.DetailView):
     model = News
     template_name = 'news/detail.html'
@@ -20,6 +21,7 @@ class DetailView(generic.DetailView):
         context = super(DetailView, self).get_context_data(**kwargs)
         context['news_menu'] = True
         return context
+
 
 class CategoryListView(generic.ListView):
     model = Category

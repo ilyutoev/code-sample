@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% load mptt_tags %}
+
+{% load news_template_tag %}
+{% load event_template_tag %}
+{% load company_template_tag %}
+
+{% load banner %}
+
+{% block title %}Справочник организаций Республики Коми - spravka11.ru{% endblock %}
+{% block description %}Справочник организаций Республики Коми - spravka11.ru{% endblock %}
+
+{% block content %}
+
+    <!--Основная часть-->
+    <div class="page__content">
+        <div class="inner">
+            <div class="inner__content">
+                <h2 class="block-header">Справочник организаций<br />Республики Коми<span class="block-header__line"></span></h2>
+                <!--Каталог-->
+                <div class="catalog">
+                    <div class="catalog__column fll" style="margin:0 30px 0 0">
+                        <ul class="catalog-list">
+                    {% recursetree seo_category1 %}
+                        {% if node.level == 0 %}
+                            <li class="catalog-list__item">
+                                <div class="catalog-entry">
+                                    <span class="catalog-entry__icon">{% if node.ico %}<img src="{{ node.ico.url }}" alt="" />{% endif %}</span>
+                                    <h3 class="catalog-entry__header">{{ node.name }}</h3>
+                        {% endif %}
+
+                        {% if node.level == 1 %}
+                            <a href="{% url 'top_companylist' node.pk %}">{{ node.name }}</a>
+                            {% if node.get_next_sibling %}
+                                <span class="bullet">&bull;</span>
+                            {% endif %}
+                        {% endif %}
+
+                        {% if not node.is_leaf_node %}
+                            {% if node.level == 0 %}
+                                <ul class="catalog-entry__useful useful-list">
+                                    {{ children }}
+                                </ul>
+                            {% elif node.level == 1 %}
+                                <p class="catalog-entry__rubrics">
+                                    {{ children }}
+                                </p>
+                            {% endif %}
+                        {% endif %}
+
+                        {% if node.level == 0 %}
+                                </div>
+                            </li>
+                        {% endif %}
+                    {% endrecursetree %}
+                                
+                        </ul>
+                    </div>
+                    <div class="catalog__column fll">
+                        <ul class="catalog-list">
+                           
+                    {% recursetree seo_category2 %}
+                        {% if node.level == 0 %}
+                            <li class="catalog-list__item">
+                                <div class="catalog-entry">
+                                    <span class="catalog-entry__icon">{% if node.ico %}<img src="{{ node.ico.url }}" alt="" />{% endif %}</span>
+                                    <h3 class="catalog-entry__header">{{ node.name }}</h3>
+                        {% endif %}
+
+                        {% if node.level == 1 %}
+                            <a href="{% url 'top_companylist' node.pk %}">{{ node.name }}</a>
+                            {% if node.get_next_sibling %}
+                                <span class="bullet">&bull;</span>
+                            {% endif %}
+                        {% endif %}
+
+                        {% if not node.is_leaf_node %}
+                            {% if node.level == 0 %}
+                                <ul class="catalog-entry__useful useful-list">
+                                    {{ children }}
+                                </ul>
+                            {% elif node.level == 1 %}
+                                <p class="catalog-entry__rubrics">
+                                    {{ children }}
+                                </p>
+                            {% endif %}
+                        {% endif %}
+
+                        {% if node.level == 0 %}
+                                </div>
+                            </li>
+                        {% endif %}
+                    {% endrecursetree %}
+
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+{% endblock %}

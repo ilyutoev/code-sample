@@ -17,7 +17,7 @@
                                     <p><img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}"></p>
                                 {% endthumbnail %}
                             {% endif %}
-                            <h3><a href="{% url 'events_detail' ses.event %}">{{ ses.event__title__min }}</a></h3>
+                            <h3><a href="{% url 'events_detail' ses.event %}">{{ ses.event__title__min|truncatechars:70 }}</a></h3>
                             {{ ses.date__min|date:"d E Y"|lower }}
                         </li>
                     {% endfor %}

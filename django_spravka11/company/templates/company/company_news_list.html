@@ -17,13 +17,19 @@
         <li class="news-list__item">
             <div class="news-item">
                 {% if news.photo %}
-                <div class="news-list__image"><a href="{% url 'current_company_news_detail' news.company.pk news.pk %}">{% thumbnail news.photo "142x95" crop="center" as im %}<img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">{% endthumbnail %}</a></div>
+                <div class="news-list__image">{% thumbnail news.photo "142x95" crop="center" as im %}<img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">{% endthumbnail %}</div>
                 {% endif %}
                 <div class="news-list__content">
                     <p class="news-item__date">{{ news.pub_date|date:"G E Y"|lower }}</p>
-                    <h3 class="news-item__header"><a href="{% url 'current_company_news_detail' news.company.pk news.pk %}">{{ news.title }}</a></h3>
+                    {% if news.company.vizitka and news.company.subdomain %}
+                        <h3 class="news-item__header"><a href="http://{{ news.company.subdomain }}.{{ MAIN_DOMAIN }}{% url 'sub_current_company_news_detail' news.pk %}">{{ news.title }}</a></h3>
+                    {% else %}
+                        <h3 class="news-item__header"><a href="{% url 'current_company_news_detail' news.company.pk news.pk %}">{{ news.title }}</a></h3>
+                    {% endif %}
+
+                    
                     <p class="news-item__text">{{ news.announcement|truncatewords:10 }}</p>
-                    <p class="news-item__text"><a href="{% url 'company_detail' news.company.pk %} ">{{ news.company }}</a></p>
+                    <p class="news-item__text"><a href="{{ news.company.get_absolute_url }} ">{{ news.company }}</a></p>
                 </div>
             </div>
         </li>

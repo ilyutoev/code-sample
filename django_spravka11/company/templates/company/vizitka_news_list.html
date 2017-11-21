@@ -6,7 +6,7 @@
 {% block description %}Новости компании {{ company.name }}{% endblock %}
 
 {% block vizitka_content %}
-<p class="breadcrumbs"><a href="{% url 'company_detail' company.pk %}" class="breadcrumbs__link">Главная</a></p>
+<p class="breadcrumbs"><a href="http://{{ company.subdomain }}.{{ MAIN_DOMAIN }}" class="breadcrumbs__link">Главная</a></p>
 
 <h1 class="block-header">Новости компании {{ object_list.0.company }}<span class="block-header__line"></span></h1>
 
@@ -17,11 +17,11 @@
             <li class="news-list__item">
             <div class="news-item">
                 {% if news.photo %}
-                <div class="news-list__image"><a href="{% url 'current_company_news_detail' news.company.pk news.pk %}">{% thumbnail news.photo "142x95" crop="center" as im %}<img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">{% endthumbnail %}</a></div>
+                <div class="news-list__image"><a href="http://{{ company.subdomain }}.{{ MAIN_DOMAIN }}{% url 'sub_current_company_news_detail' news.pk %}">{% thumbnail news.photo "142x95" crop="center" as im %}<img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">{% endthumbnail %}</a></div>
                 {% endif %}
                 <div class="news-list__content">
                     <p class="news-item__date">{{ news.pub_date|date:"G E Y"|lower }}</p>
-                    <h3 class="news-item__header"><a href="{% url 'current_company_news_detail' news.company.pk news.pk %}">{{ news.title }}</a></h3>
+                    <h3 class="news-item__header"><a href="http://{{ company.subdomain }}.{{ MAIN_DOMAIN }}{% url 'sub_current_company_news_detail' news.pk %}">{{ news.title }}</a></h3>
                     <p class="news-item__text">{{ news.announcement|truncatewords:10 }}</p>
                 </div>
             </div>
@@ -40,18 +40,18 @@
     <ul class="pages">
         <li class="pages__page pages__page--text">Страницы</li>
         {% if page_obj.has_previous %}
-            <li class="pages__page"><a href="{% url 'current_company_news_all' %}">Первая</a></li>
+            <li class="pages__page"><a href="http://{{ company.subdomain }}.{{ MAIN_DOMAIN }}{% url 'sub_current_company_news_all' %}">Первая</a></li>
         {% endif %}
         {% if page_obj.has_previous %}
             {% if page_obj.previous_page_number == 1 %}
-                <li class="pages__page"><a href="{% url 'current_company_news_all' %}">«</a></li>
+                <li class="pages__page"><a href="http://{{ company.subdomain }}.{{ MAIN_DOMAIN }}{% url 'sub_current_company_news_all' %}">«</a></li>
             {% else %}
                 <li class="pages__page"><a href="?page={{ page_obj.previous_page_number }}">«</a></li>
             {% endif %}
         {% endif %}
         {% for page in paginator.page_range|get_before:page_obj.number %}
             {% if page == 1 %}
-                <li class="pages__page"><a href="{% url 'current_company_news_all' %}">{{ page }}</a></li>
+                <li class="pages__page"><a href="http://{{ company.subdomain }}.{{ MAIN_DOMAIN }}{% url 'sub_current_company_news_all' %}">{{ page }}</a></li>
             {% else %}
                 <li class="pages__page"><a href="?page={{ page }}">{{ page }}</a></li>
             {% endif %}

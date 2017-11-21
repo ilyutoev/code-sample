@@ -4,7 +4,7 @@
 {% block description %}{{ object.title }} - {{ company.name }}{% endblock %}
 
 {% block vizitka_content %}
-<p class="breadcrumbs"><a href="{% url 'company_detail' company.pk %}" class="breadcrumbs__link">Главная</a></p>
+<p class="breadcrumbs"><a href="http://{{ company.subdomain }}.{{ MAIN_DOMAIN }}" class="breadcrumbs__link">Главная</a></p>
 
 <h1 class="block-header">{{ object.title }}<span class="block-header__line"></span></h1>
 

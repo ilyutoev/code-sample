@@ -1,59 +1,92 @@
-from django.shortcuts import render, Http404, get_object_or_404, render_to_response
-from company.models import Category, Company, Address, CompanyNews, CompanyService, CompanyImage, CompanyPage, Timetable, Phone
-from django.views.generic import ListView, DetailView
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-
-from django.contrib.admin.views.decorators import staff_member_required
-from django.template import RequestContext
-
-from django.db.models import Max
-
-from haystack.query import SearchQuerySet
-
 from math import ceil
-
-from django.http import HttpResponse, HttpResponseRedirect
-from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import json
-
-from .forms import UploadFileImportForm
-from spravka11.settings import MEDIA_ROOT
-import tablib
-from import_export import fields, widgets, resources
 from zipfile import *
 import os
-import pymysql
-from datetime import datetime
-
-from django.core.mail import EmailMessage
-
 import re
+from itertools import chain
+from django.shortcuts import render, Http404, render_to_response
+from django.views.generic import ListView, DetailView
+from django.contrib.admin.views.decorators import staff_member_required
+from django.template import RequestContext
+from django.db.models import Max
+from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.core.mail import EmailMessage
+from haystack.query import SearchQuerySet
 
+from company.models import Category, Company, Address, CompanyNews, CompanyService, CompanyImage, CompanyPage, Timetable, Phone, SeoCategory
+from .forms import UploadFileImportForm
+from spravka11.settings import MEDIA_ROOT
 from misc.models import Autocomplete
 
+
 def site_index(request):
+    list_level0 = SeoCategory.objects.filter(level=0).values_list('pk', flat=True)
+    part1 = list_level0[:int(len(list_level0)/2)]
+    part2 = list_level0[int(len(list_level0)/2):]
+
+    cat1 = SeoCategory.objects.filter(pk__in=part1) | SeoCategory.objects.filter(parent__pk__in=part1)
+    cat2 = SeoCategory.objects.filter(pk__in=part2) | SeoCategory.objects.filter(parent__pk__in=part2)
+
+    context = {'seo_category1': cat1}
+    context['seo_category2'] = cat2
+
+    temp_company_logo = Company.objects.filter(logo__isnull=False, recomendation=True).order_by('?')
+
+    row_count = 3
+    i = ceil(len(temp_company_logo)/row_count)
+    pl = []
+    for x in range(i):
+        pl.append(temp_company_logo[x*row_count:x*row_count+row_count])
+    context['logo_company'] = pl
+
+    context['is_index'] = True
+    return render(request, 'company/index.html', context)
+
+
+class SeoCompanyList(ListView):
+    template_name = 'company/seo_company_list.html'
+    paginate_by = 10
+    count = 0
+
+    def get_queryset(self):
+        temp_id = Address.objects.filter(seo_category=self.args[0]).values('company', 'city').distinct().annotate(Max('id')).values_list('id__max', flat=True)
+
+        company = Address.objects.filter(pk__in=temp_id).order_by('-company__yellow',
+                                                                  '-company__blue',
+                                                                  '-company__priority',
+                                                                  'company__name')
+
+        self.count = company.count()
+        return company
+
+    def get_context_data(self, **kwargs):
+        context = super(SeoCompanyList, self).get_context_data(**kwargs)
+        context['category'] = SeoCategory.objects.get(pk=self.args[0])
+        context['category_list'] = SeoCategory.objects.filter(parent=self.args[0])
+        context['count'] = self.count
+        return context
+
+
+def category_index(request):
     list_level0 = Category.objects.filter(level=0).values_list('pk', flat=True)
     part1 = list_level0[:int(len(list_level0)/2)]
     part2 = list_level0[int(len(list_level0)/2):]
 
-    cat1 = Category.objects.filter(pk__in=part1) | Category.objects.filter(parent__pk__in=part1) | Category.objects.filter(parent__parent__pk__in=part1)
-    cat2 = Category.objects.filter(pk__in=part2) | Category.objects.filter(parent__pk__in=part2) | Category.objects.filter(parent__parent__pk__in=part2)
+    cat1 = Category.objects.filter(pk__in=part1) |\
+           Category.objects.filter(parent__pk__in=part1) |\
+           Category.objects.filter(parent__parent__pk__in=part1)
+    cat2 = Category.objects.filter(pk__in=part2) |\
+           Category.objects.filter(parent__pk__in=part2) |\
+           Category.objects.filter(parent__parent__pk__in=part2)
 
     context = {'category1': cat1}
     context['category2'] = cat2
 
     context['abc'] = abc
 
-    #выбираем все компании с лого и галкой "на главную" и разбиваем для вывода в столбик на нужное число
-    temp_company_logo = Company.objects.filter(logo__isnull=False, recomendation=True).values('logo', 'name', 'pk', 'recomendationtext')
-    i = ceil(len(temp_company_logo)/1)
-    pl = []
-    for x in range(i):
-        pl.append(temp_company_logo[x*1:x*1+1])
-    context['logo_company'] = pl
+    return render(request, 'company/category_index.html', context)
 
-    context['is_index'] = True
-    return render(request, 'company/index.html', context)
 
 class CompanyList(ListView):
     template_name = 'company/company_list.html'
@@ -61,19 +94,22 @@ class CompanyList(ListView):
     count = 0
 
     def get_queryset(self):
-        #это адский запрос - может можно проще (выбираем адреса компаний - по одному в каждом городе)
         temp_id = Address.objects.filter(category=self.args[0]).values('company', 'city').distinct().annotate(Max('id')).values_list('id__max', flat=True)
-        company = Address.objects.filter(pk__in=temp_id).order_by('city__priority', '-company__yellow', '-company__blue', '-company__priority', 'company__name')
+        company = Address.objects.filter(pk__in=temp_id).order_by('-company__yellow',
+                                                                  '-company__blue',
+                                                                  '-company__priority',
+                                                                  'company__name')
+
         self.count = company.count()
         return company
 
     def get_context_data(self, **kwargs):
         context = super(CompanyList, self).get_context_data(**kwargs)
         context['category'] = Category.objects.get(pk=self.args[0])
-        #для вывода подрубрик
         context['category_list'] = Category.objects.filter(parent=self.args[0])
         context['count'] = self.count
         return context
+
 
 class CategoryABCList(ListView):
     template_name = 'company/abc_list.html'
@@ -104,6 +140,7 @@ class CategoryABCList(ListView):
         context['leter'] = abc[value]
         return context
 
+
 class CompanyDetail(DetailView):
     model = Company
     template_name = 'company/detail.html'
@@ -120,41 +157,33 @@ class CompanyDetail(DetailView):
         company = Company.objects.get(pk=int(self.kwargs['pk']))
         company.counter = company.counter + 1
         company.save()
+
+        try:
+            context['cookie_city'] = self.request.session['city']
+
+            if context['cookie_city'] == 'Все города':
+                first_path = Address.objects.filter(company=company, city__name='Сыктывкар')
+                second_path = Address.objects.filter(company=company).exclude(city__name='Сыктывкар')
+                context['city_address'] = chain(first_path, second_path)
+                context['common_company'] = company.common_company()
+            else:
+                first_path = Address.objects.filter(company=company, city__name=self.request.session['city'])
+                second_path = Address.objects.filter(company=company).exclude(city__name=self.request.session['city'])
+                context['city_address'] = chain(first_path, second_path)
+                context['common_company'] = company.common_company(city=self.request.session['city'])
+        except:
+            context['cookie_city'] = ''
+            context['city_address'] = Address.objects.filter(company=company)
+            context['common_company'] = company.common_company()
+
         return context
 
-    #примитивный счетчик посещений
-    '''
-    def dispatch(self, request, *args, **kwargs):
-        response = super(CompanyDetail, self).get(request, *args, **kwargs)
-        reset_last_visit_time = False
-        string_key = 'last_visit' + str(self.kwargs['pk'])
-        if string_key in request.COOKIES:
-            last_visit = request.COOKIES.get(string_key)
-            try:
-                last_visit_time = datetime.strptime(last_visit[:-7], "%Y-%m-%d %H:%M:%S")
-            except:
-                last_visit_time = datetime.now()
-            if (datetime.now() - last_visit_time).days > 0:
-                company = Company.objects.get(pk=int(self.kwargs['pk']))
-                company.counter = company.counter + 1
-                company.save()
-                reset_last_visit_time = True
-        else:
-            company = Company.objects.get(pk=int(self.kwargs['pk']))
-            company.counter = company.counter + 1
-            company.save()
-            reset_last_visit_time = True
-
-        if reset_last_visit_time:
-            response.set_cookie(string_key, datetime.now(), max_age=87000)
-      
-        return response
-    '''
 
 class CompanyNewsAll(ListView):
     model = CompanyNews
     template_name = 'company/company_news_list.html'
     paginate_by = 10
+
 
 class CompanyNewsDetail(DetailView):
     model = CompanyNews
@@ -171,6 +200,7 @@ class CompanyNewsDetail(DetailView):
         context = super(CompanyNewsDetail, self).get_context_data(**kwargs)
         context['company'] = Company.objects.get(pk=int(self.kwargs['company_pk']))
         return context
+
 
 class CurrentCompanyNewsAll(ListView):
     model = CompanyNews
@@ -189,6 +219,7 @@ class CurrentCompanyNewsAll(ListView):
         context['company'] = Company.objects.get(pk=int(self.kwargs['company_pk']))
         return context
 
+
 class CurrentCompanyService(ListView):
     model = CompanyService
     template_name = 'company/vizitka_service_list.html'
@@ -204,6 +235,7 @@ class CurrentCompanyService(ListView):
         context = super(CurrentCompanyService, self).get_context_data(**kwargs)
         context['company'] = Company.objects.get(pk=int(self.kwargs['company_pk']))
         return context
+
 
 class CompanyServiceDetail(DetailView):
     model = CompanyService
@@ -221,6 +253,7 @@ class CompanyServiceDetail(DetailView):
         context['company'] = Company.objects.get(pk=int(self.kwargs['company_pk']))
         return context
 
+
 class CompanyImageAll(ListView):
     model = CompanyImage
     template_name = 'company/vizitka_photo_list.html'
@@ -236,6 +269,7 @@ class CompanyImageAll(ListView):
         context = super(CompanyImageAll, self).get_context_data(**kwargs)
         context['company'] = Company.objects.get(pk=int(self.kwargs['company_pk']))
         return context
+
 
 class CompanyPageView(DetailView):
     model = CompanyPage
@@ -257,7 +291,6 @@ class CompanyPageView(DetailView):
 class CompanySearch(ListView):
     template_name = "company/search.html"
     paginate_by = 10
-    context_object_name = 'search_results'
     count = 0
     q_punto = ''
     q_spell = ''
@@ -271,41 +304,71 @@ class CompanySearch(ListView):
         context['q_spell'] = self.q_spell
         context['city'] = city
         context['search_results_count'] = self.count
+        self.request.session['city'] = city
         return context
 
     def get_queryset(self):
-        #функция для пунтосвитчера
         def fix_layout(s):
             return ''.join([_trans_table.get(c, c) for c in s])
 
-        # Get the q GET parameter
         q = self.request.GET.get('q')
         city = self.request.GET.get('city')
         if q:
-            results = SearchQuerySet().filter(content=q, city=city).values_list('company', flat=True)
+            if city == 'Все города':
+                results = SearchQuerySet().filter(content=q).values_list('company', flat=True)
+            else:
+                results = SearchQuerySet().filter(content=q, city=city).values_list('company', flat=True)
+
             if results.count() == 0:
-                #пунто свитчер
                 _eng_chars = "~!@#$%^&qwertyuiop[]asdfghjkl;'zxcvbnm,./QWERTYUIOP{}ASDFGHJKL:\"|ZXCVBNM<>?"
                 _rus_chars = "ё!\"№;%:?йцукенгшщзхъфывапролджэячсмитьбю.ЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭ/ЯЧСМИТЬБЮ,"
                 _trans_table = dict(zip(_eng_chars, _rus_chars))
 
                 if re.fullmatch('[a-zA-Z0-9\s]*', q):
                     self.q_punto = fix_layout(q)
-                    results = SearchQuerySet().filter(content=self.q_punto, city=city).values_list('company', flat=True)
+                    if city == 'Все города':
+                        results = SearchQuerySet().filter(content=self.q_punto).values_list('company', flat=True)
+                    else:
+                        results = SearchQuerySet().filter(content=self.q_punto, city=city).values_list('company', flat=True)
+
                     if results.count() == 0:
                         sqs = SearchQuerySet().auto_query(self.q_punto)
                         self.q_spell = sqs.spelling_suggestion()
-                        results = SearchQuerySet().filter(content=self.q_spell, city=city).values_list('company', flat=True)
+                        if city == 'Все города':
+                            results = SearchQuerySet().filter(content=self.q_spell).values_list('company', flat=True)
+                        else:
+                            results = SearchQuerySet().filter(content=self.q_spell, city=city).values_list('company', flat=True)
+
                 if results.count() == 0:
                     sqs = SearchQuerySet().auto_query(q)
                     self.q_spell = sqs.spelling_suggestion()
-                    results = SearchQuerySet().filter(content=self.q_spell, city=city).values_list('company', flat=True)
+                    if city == 'Все города':
+                        results = SearchQuerySet().filter(content=self.q_spell).values_list('company', flat=True)
+                    else:
+                        results = SearchQuerySet().filter(content=self.q_spell, city=city).values_list('company', flat=True)
 
-            search_results = Company.objects.filter(pk__in=set(results)).order_by('-yellow', '-blue', '-priority', 'name')
+                if results.count() == 0:
+                    if city == 'Все города':
+                        results = Company.objects.filter(name__icontains=q).values_list('pk', flat=True)
+                    else:
+                        results = Company.objects.filter(name__icontains=q, address__city__name=city).values_list('pk', flat=True)
+
+
+            if city == 'Все города':
+                temp_id = Address.objects.filter(company__in=set(results)).values('company').distinct().annotate(Max('id')).values_list('id__max', flat=True)
+            else:
+                temp_id = Address.objects.filter(company__in=set(results), city__name=city).values('company', 'city').distinct().annotate(Max('id')).values_list('id__max', flat=True)
+
+            search_results = Address.objects.filter(pk__in=temp_id).order_by('-company__yellow',
+                                                                             '-company__blue',
+                                                                             '-company__priority',
+                                                                             'company__name')
+
             self.count = search_results.count()
         else:
             search_results = ''
         return search_results
+
 
 def autocomplete(request):
     if request.is_ajax():
@@ -323,6 +386,7 @@ def autocomplete(request):
         data = 'fail'
     return HttpResponse(data, content_type='application/json')
 
+
 @csrf_exempt
 def formcompanyerror(request):
     if request.method == "POST" and request.is_ajax():
@@ -339,6 +403,7 @@ def formcompanyerror(request):
         return HttpResponse(json.dumps("success"), content_type="application/json")
     else:
         return HttpResponse('')
+
 
 @csrf_exempt
 def formcompanybackcall(request):
@@ -359,6 +424,7 @@ def formcompanybackcall(request):
     else:
         return HttpResponse('')
 
+
 def addcompany(request):
     if request.method == "POST":
         try:
@@ -377,6 +443,7 @@ def addcompany(request):
         category = Category.objects.filter(level=2).order_by('name')
         return render(request, 'company/add_company.html', {'category': category})
 
+
 @staff_member_required
 def admin_company_import_export(request):
     if request.method == 'POST':
@@ -391,6 +458,7 @@ def admin_company_import_export(request):
     context['form'] = form
 
     return render_to_response('company/admin_import.html', context, context_instance=RequestContext(request))
+
 
 def handle_uploaded_file(f):
     name = MEDIA_ROOT + '/import/company/company.zip'
